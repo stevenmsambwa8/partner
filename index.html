@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VYNAL DEVS - Official Partner Coming Soon</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="remixicon.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.min.css">
     <style>
         :root {
             --primary: #1e5ba8;
@@ -35,9 +35,6 @@
         .bg-glow {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: 
-                radial-gradient(circle at 10% 20%, rgba(30, 91, 168, 0.04) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(30, 91, 168, 0.04) 0%, transparent 40%);
             z-index: -1;
             animation: pulseBg 10s infinite alternate;
         }
@@ -60,10 +57,7 @@
         .logo { margin-bottom: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05)); }
 
         .main-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid #e5e5e5;
-            border-radius: 20px;
+            background: none;
             padding: 40px 20px;
             text-align: center;
             width: 100%;
@@ -92,7 +86,15 @@
             width: 45px; height: 45px;
             background: #fff; border: 1px solid #ddd;
             border-radius: 8px; display: flex;
-            align-items: center; justify-content: center; font-size: 20px;
+            align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+
+        .mini-logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 4px;
         }
 
         .vs-label { font-weight: 900; color: #ccc; font-style: italic; font-size: 12px; }
@@ -143,7 +145,7 @@
         .card-line {
             position: absolute;
             top: 50%; left: 0; width: 100%; height: 1px;
-            background: rgba(0,0,0,0.1);
+            background: none;
             z-index: 10;
             pointer-events: none;
         }
@@ -153,10 +155,10 @@
             left: 0; width: 100%; height: 50%; 
             overflow: hidden; background: var(--flip-bg); 
             backface-visibility: hidden; 
-            border: 1px solid #f0f0f0; 
+            border: 1px solid none; 
         }
 
-        .top, .next-top { top: 0; border-radius: 8px 8px 0 0; line-height: 90px; border-bottom: 1px solid rgba(0,0,0,0.02); }
+        .top, .next-top { top: 0; border-radius: 8px 8px 0 0; line-height: 90px; border-bottom: 1px solid none; }
         .bottom, .next-bottom { bottom: 0; border-radius: 0 0 8px 8px; line-height: 0; }
         
         .flipping .top { z-index: 3; animation: flip-top var(--anim-speed) ease-in forwards; transform-origin: bottom; }
@@ -185,29 +187,9 @@
 <body>
     <div class="bg-glow"></div>
     <div class="container">
-        <div class="logo"><img src="logo.png" height="45"></div>
         <div class="main-card">
-            <div class="live-dot"><div class="dot"></div> System Active</div>
+            <div class="live-dot"><div class="dot"></div> countdown active</div>
             
-            <div class="guess-row">
-                <div class="guess-item">
-                    <div class="mini-logo-box"><img src="logo.png" width="28"></div>
-                    <span class="time-label" style="color:var(--text-main)">VYNAL</span>
-                </div>
-                
-                <div class="vs-label">VS</div>
-                
-                <div class="guess-item">
-                    <div class="mini-logo-box" id="g-logo"><i class="ri-question-mark"></i></div>
-                    <div class="picker-arrows">
-                        <button class="arrow-btn" onclick="cycle(1)"><i class="ri-arrow-up-s-line"></i></button>
-                        <button class="arrow-btn" onclick="cycle(-1)"><i class="ri-arrow-down-s-line"></i></button>
-                    </div>
-                    <button class="cast-btn" onclick="vote()">GUESS</button>
-                </div>
-                
-                <div id="v-stats" style="font-size: 10px; font-weight: 800; color: var(--primary); margin-left: 5px;">0% match</div>
-            </div>
 
             <div class="title">Official</div>
             <div class="partner-text">Partner</div>
@@ -251,6 +233,28 @@
                 </div>
             </div>
             
+            <div class="guess-row">
+                <div class="guess-item">
+                    <div class="mini-logo-box"><img src="logo.png" width="28"></div>
+                    <span class="time-label" style="color:var(--text-main)">VYNAL</span>
+                </div>
+                
+                <div class="vs-label">VS</div>
+                
+                <div class="guess-item">
+                    <div class="mini-logo-box" id="g-logo">
+                        <img id="partner-img" src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Partner Logo">
+                    </div>
+                    <div class="picker-arrows">
+                        <button class="arrow-btn" onclick="cycle(1)"><i class="ri-arrow-up-s-line"></i></button>
+                        <button class="arrow-btn" onclick="cycle(-1)"><i class="ri-arrow-down-s-line"></i></button>
+                    </div>
+                    <button class="cast-btn" onclick="vote()">GUESS</button>
+                </div>
+                
+                <div id="v-stats" style="font-size: 10px; font-weight: 800; color: var(--primary); margin-left: 5px;">0% match</div>
+            </div>
+
             <button class="notify-btn" onclick="toggleSheet()"><i class="ri-notification-3-line"></i><span>Get Notified</span></button>
         </div>
     </div>
@@ -259,27 +263,32 @@
         <div style="width: 50px; height: 5px; background: #eee; border-radius: 10px; margin: 0 auto 30px; cursor: pointer;" onclick="toggleSheet()"></div>
         <div class="sheet-content">
             <h2><i class="ri-sparkling-line" style="color:var(--primary)"></i> Something Big is Coming</h2>
-            <p>VYNAL DEVS is thrilled to announce our newest official partnership launching on <strong>January 20, 2026</strong>.</p>
-            <p>This collaboration will bring incredible new opportunities, tools, and resources to our developer community. We're working with an industry leader to revolutionize how you build and deploy applications.</p>
+            <p>VYNAL Team is thrilled to announce our newest official partnership starting on <strong>January 20, 2026</strong>.</p>
+            <p>This collaboration will bring incredible new opportunities, music tools, and resources to our music developer community. We're working with an industry leader to revolutionize how you build and upload your music.</p>
             <p><strong>What to expect:</strong></p>
             <p style="margin-left: 10px;">
                 <i class="ri-checkbox-circle-line" style="color:var(--primary)"></i> Enhanced tools & integrations<br>
-                <i class="ri-checkbox-circle-line" style="color:var(--primary)"></i> Cutting-edge technology access<br>
-                <i class="ri-checkbox-circle-line" style="color:var(--primary)"></i> Community events & workshops
+                <i class="ri-checkbox-circle-line" style="color:var(--primary)"></i> Music uploading access<br>
+                <i class="ri-checkbox-circle-line" style="color:var(--primary)"></i> Monitored events & debating
             </p>
-            <p style="margin-top: 30px; text-align: center; color: var(--primary); font-weight: 700;">
-                <i class="ri-timer-line"></i> SYSTEM ONLINE • COUNTDOWN ACTIVE
-            </p>
+            <a href="https://chat.whatsapp.com/Kr6LtHAuJvi6XJxFHmjcdc" style="text-decoration: none;">
+                <button class="notify-btn"><i class="ri-whatsapp-line"></i><span>Join Whatsapp Waiting List</span></button>
+            </a>
         </div>
     </div>
 
     <script>
-        const partners = [{ n: 'Google', i: 'ri-google-fill' }, { n: 'Microsoft', i: 'ri-microsoft-fill' }, { n: 'Amazon', i: 'ri-amazon-fill' }, { n: 'Github', i: 'ri-github-fill' }];
+        const partners = [
+            { n: 'Calls', img: 'logo2.png' },
+            { n: 'Shafee', img: 'shafee.jpg' },
+            { n: 'Musicalls', img: 'logo.png' },
+            { n: 'Shafee', img: 'shafee.jpg' }
+        ];
         let idx = 0;
 
         function cycle(dir) {
             idx = (idx + dir + partners.length) % partners.length;
-            document.getElementById('g-logo').innerHTML = `<i class="${partners[idx].i}"></i>`;
+            document.getElementById('partner-img').src = partners[idx].img;
             updStats();
         }
 
