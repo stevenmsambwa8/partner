@@ -304,7 +304,7 @@ button{
       <label class="check">
         <input type="checkbox" id="terms" required>
         <div class="tick"><i class="ri-check-line"></i></div>
-        <span>I agree to the <a href="#" onclick="openTerms()">Terms & Conditions</a></span>
+        <span>I agree to the <a href="#" id="termsLink">Terms & Conditions</a></span>
       </label>
 
       <label class="check">
@@ -315,8 +315,8 @@ button{
     </div>
 
     <div class="nav">
-      <button type="button" class="prev" onclick="prev()">Back</button>
-      <button type="button" class="next" onclick="next()">Next</button>
+      <button type="button" class="prev" id="prevBtn">Back</button>
+      <button type="button" class="next" id="nextBtn">Next</button>
     </div>
   </form>
 
@@ -331,7 +331,7 @@ button{
   </div>
 </div>
 
-<div class="backdrop" id="backdrop" onclick="closeTerms()"></div>
+<div class="backdrop" id="backdrop"></div>
 
 <div class="sheet" id="terms">
   <h3>Terms & Conditions</h3>
@@ -343,7 +343,7 @@ button{
     No ownership of music is transferred. Participation is voluntary
     and may be withdrawn with notice.
   </p>
-  <button class="next" onclick="closeTerms()">Close</button>
+  <button class="next" id="closeTermsBtn">Close</button>
 </div>
 
 <script>
@@ -610,8 +610,8 @@ async function submitForm() {
 }
 
 // ========== TERMS MODAL ==========
-function openTerms() {
-  event.preventDefault()
+function openTerms(e) {
+  if (e) e.preventDefault()
   document.getElementById('terms').classList.add("active")
   document.getElementById('backdrop').classList.add("active")
 }
@@ -620,6 +620,13 @@ function closeTerms() {
   document.getElementById('terms').classList.remove("active")
   document.getElementById('backdrop').classList.remove("active")
 }
+
+// ========== EVENT LISTENERS ==========
+document.getElementById('prevBtn').addEventListener('click', prev)
+document.getElementById('nextBtn').addEventListener('click', next)
+document.getElementById('termsLink').addEventListener('click', openTerms)
+document.getElementById('backdrop').addEventListener('click', closeTerms)
+document.getElementById('closeTermsBtn').addEventListener('click', closeTerms)
 
 // ========== FLOATING TROPHIES ==========
 const wrap = document.getElementById("trophies")
