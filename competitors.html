@@ -6,7 +6,6 @@
 <title>VYNAL Champion Wizard</title>
 
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
@@ -88,9 +87,10 @@ label{font-size:13px;color:var(--muted)}
 input,select,textarea{
   padding:14px;border-radius:14px;
   border:1px solid var(--border);
-  background:#0e0e17;color:#fff;font-size:15px
+  background:#0e0e17;color:#fff;font-size:15px;
+  width: 100%;
 }
-textarea{min-height:110px}
+textarea{min-height:110px; resize: none;}
 
 /* Upload */
 .upload-box{
@@ -167,9 +167,11 @@ textarea{min-height:110px}
 .nav{display:flex;gap:12px;margin-top:8px}
 button{
   flex:1;padding:14px;border-radius:14px;
-  border:none;font-size:15px;font-weight:700;cursor:pointer
+  border:none;font-size:15px;font-weight:700;cursor:pointer;
+  transition: opacity 0.2s;
 }
-.prev{background:#232338;color:#fff}
+button:active { opacity: 0.8; }
+.prev{background:#232338;color:#fff; display: none;} /* Hidden by default */
 .next{background:linear-gradient(135deg,var(--accent),#5c32ff);color:#fff}
 
 /* Success */
@@ -253,21 +255,19 @@ button{
   <h1>Create Winner Profile</h1>
   <p class="subtitle">Only legends reach this screen</p>
 
-  <div class="progress">
+  <div class="progress" id="progressBar">
     <div class="active"></div><div></div><div></div><div></div><div></div>
   </div>
 
   <form id="form">
 
-    <!-- Step 1 -->
     <div class="step active">
       <div class="field"><label>Artist Name</label><input id="artistName" value="Ayomivibezz" disabled></div>
       <div class="field"><label>Title</label><input value="VYNAL Champion Artist" disabled></div>
     </div>
 
-    <!-- Step 2 -->
     <div class="step">
-      <div class="field"><label>Primary Genre</label><input id="genre" required></div>
+      <div class="field"><label>Primary Genre</label><input id="genre" placeholder="e.g. Afrobeats" required></div>
       <div class="field"><label>Phone Number</label><input id="phone" type="tel" placeholder="+234..." required></div>
       <div class="field">
         <label>Experience</label>
@@ -282,13 +282,11 @@ button{
       </div>
     </div>
 
-    <!-- Step 3 -->
     <div class="step">
       <div class="field"><label>What should artists learn from you?</label><textarea id="learnFrom" required></textarea></div>
       <div class="field"><label>How can artists challenge you?</label><textarea id="challenge" required></textarea></div>
     </div>
 
-    <!-- Step 4 -->
     <div class="step">
       <div class="upload-box" id="uploadBox">
         <i class="ri-image-add-line"></i>
@@ -299,10 +297,9 @@ button{
       <div class="preview" id="preview"></div>
     </div>
 
-    <!-- Step 5 -->
     <div class="step">
       <label class="check">
-        <input type="checkbox" id="terms" required>
+        <input type="checkbox" id="termsCheckbox" required>
         <div class="tick"><i class="ri-check-line"></i></div>
         <span>I agree to the <a href="#" id="termsLink">Terms & Conditions</a></span>
       </label>
@@ -327,38 +324,25 @@ button{
 
   <div class="success" id="success">
     <h2>👑 Champion Identified</h2>
-    <p>Ayomivibezz you are officially the artist to beat.</p>
+    <p>Ayomivibezz, you are officially the artist to beat.</p>
   </div>
 </div>
 
 <div class="backdrop" id="backdrop"></div>
 
-<div class="sheet" id="terms">
+<div class="sheet" id="termsSheet">
   <h3>Terms & Conditions</h3>
-  <p>
-    All submitted content must be original and owned by the artist.
-    VYNAL may showcase profiles, images, and music for promotional use.
-  </p>
-  <p>
-    No ownership of music is transferred. Participation is voluntary
-    and may be withdrawn with notice.
-  </p>
-  <button class="next" id="closeTermsBtn">Close</button>
+  <p>All submitted content must be original and owned by the artist. VYNAL may showcase profiles, images, and music for promotional use.</p>
+  <p>No ownership of music is transferred. Participation is voluntary and may be withdrawn with notice.</p>
+  <button type="button" class="next" id="closeTermsBtn">Close</button>
 </div>
 
-<script>
-// ========== CONFIGURATION ==========
-// Replace these with your actual Supabase credentials
-const SUPABASE_URL = 'https://xaudpqhyyxburjazfips.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhdWRwcWh5eXhidXJqYXpmaXBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzMTY1NDUsImV4cCI6MjA3Nzg5MjU0NX0.LxRbfT0TsxJ38dwTQyKhn_Hi1cuZXZ6tpE04YPatGkQ'
+<script type="module">
+import { supabase } from './supabase-client.js'
 
-// Initialize Supabase
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-// Expiration time: 17 hours from now
+// Expiration: 17 hours from now
 const EXPIRATION_TIME = new Date().getTime() + (17 * 60 * 60 * 1000)
 
-// ========== EXPIRATION CHECK ==========
 function checkExpiration() {
   const now = new Date().getTime()
   if (now >= EXPIRATION_TIME) {
@@ -367,90 +351,114 @@ function checkExpiration() {
         <i class="ri-time-line"></i>
         <h2>Link Expired</h2>
         <p>This champion profile submission link has expired.</p>
-        <p style="margin-top:8px;font-size:13px">Please contact VYNAL support for a new link.</p>
       </div>
     `
     return true
   }
   return false
 }
-
-// Check expiration on load
-if (checkExpiration()) {
-  throw new Error('Page expired')
-}
-
-// Check expiration every minute
 setInterval(checkExpiration, 60000)
 
 // ========== WIZARD LOGIC ==========
 let step = 0
-const steps = document.querySelectorAll(".step")
-const bars = document.querySelectorAll(".progress div")
 let uploadedFiles = []
 
-function show() {
-  steps.forEach((s, i) => s.classList.toggle("active", i === step))
-  bars.forEach((b, i) => b.classList.toggle("active", i <= step))
-  document.querySelector(".prev").style.display = step === 0 ? "none" : "block"
-  document.querySelector(".next").textContent = step === steps.length - 1 ? "Finish" : "Next"
-}
+window.addEventListener('DOMContentLoaded', () => {
+  const steps = document.querySelectorAll(".step")
+  const bars = document.querySelectorAll(".progress div")
+  const prevBtn = document.getElementById('prevBtn')
+  const nextBtn = document.getElementById('nextBtn')
 
-async function next() {
-  // Check expiration before proceeding
-  if (checkExpiration()) return
-
-  const inputs = steps[step].querySelectorAll("input:not([type='file']):not([type='checkbox']),select,textarea")
-  for (const i of inputs) {
-    if (!i.checkValidity()) {
-      i.reportValidity()
-      return
-    }
-  }
-
-  // Validate checkboxes on last step
-  if (step === steps.length - 1) {
-    const termsChecked = document.getElementById('terms').checked
-    const promotionChecked = document.getElementById('promotion').checked
+  function show() {
+    // Show/Hide steps
+    steps.forEach((s, i) => s.classList.toggle("active", i === step))
+    // Update progress bars
+    bars.forEach((b, i) => b.classList.toggle("active", i <= step))
     
-    if (!termsChecked || !promotionChecked) {
-      alert('Please accept both terms to continue')
-      return
+    // Hide Back btn on first step
+    prevBtn.style.display = (step === 0) ? "none" : "block"
+    
+    // Change Next text on last step
+    nextBtn.textContent = (step === steps.length - 1) ? "Finish" : "Next"
+  }
+
+  async function next() {
+    if (checkExpiration()) return
+
+    // Validation
+    const inputs = steps[step].querySelectorAll("input,select,textarea")
+    for (const i of inputs) {
+      if (!i.checkValidity()) {
+        i.reportValidity()
+        return
+      }
+    }
+
+    // Step 5 specific checkbox check
+    if (step === steps.length - 1) {
+      const termsChecked = document.getElementById('termsCheckbox').checked
+      const promotionChecked = document.getElementById('promotion').checked
+      
+      if (!termsChecked || !promotionChecked) {
+        alert('Please accept both terms to continue')
+        return
+      }
+      // If valid, submit
+      await submitForm()
+    } else {
+      step++
+      show()
     }
   }
 
-  if (step < steps.length - 1) {
-    step++
-    show()
-  } else {
-    await submitForm()
+  function prev() {
+    if (step > 0) {
+      step--
+      show()
+    }
   }
-}
 
-function prev() {
-  if (step > 0) {
-    step--
-    show()
-  }
-}
+  prevBtn.onclick = prev
+  nextBtn.onclick = next
 
-show()
+  // Initialize view
+  show()
 
-// ========== IMAGE UPLOAD LOGIC ==========
-const uploadBox = document.getElementById('uploadBox')
-const imagesInput = document.getElementById('images')
-const preview = document.getElementById('preview')
+  // ========== IMAGE UPLOAD ==========
+  const uploadBox = document.getElementById('uploadBox')
+  const imagesInput = document.getElementById('images')
+  const preview = document.getElementById('preview')
 
-uploadBox.onclick = () => imagesInput.click()
+  uploadBox.onclick = () => imagesInput.click()
 
-imagesInput.addEventListener("change", () => {
-  [...imagesInput.files].forEach(f => {
-    uploadedFiles.push(f)
-    const img = document.createElement("img")
-    img.src = URL.createObjectURL(f)
-    preview.appendChild(img)
+  imagesInput.addEventListener("change", () => {
+    [...imagesInput.files].forEach(f => {
+      uploadedFiles.push(f)
+      const img = document.createElement("img")
+      img.src = URL.createObjectURL(f)
+      preview.appendChild(img)
+    })
+    imagesInput.value = ""
   })
-  imagesInput.value = ""
+
+  // ========== TERMS MODAL ==========
+  const termsSheet = document.getElementById('termsSheet')
+  const backdrop = document.getElementById('backdrop')
+
+  function openTerms(e) {
+    if (e) e.preventDefault()
+    termsSheet.classList.add("active")
+    backdrop.classList.add("active")
+  }
+
+  function closeTerms() {
+    termsSheet.classList.remove("active")
+    backdrop.classList.remove("active")
+  }
+
+  document.getElementById('termsLink').onclick = openTerms
+  backdrop.onclick = closeTerms
+  document.getElementById('closeTermsBtn').onclick = closeTerms
 })
 
 // ========== IMAGE COMPRESSION ==========
@@ -458,62 +466,25 @@ async function compressImage(file, targetSizeKB = 200) {
   return new Promise((resolve, reject) => {
     const img = new Image()
     const reader = new FileReader()
-
-    reader.onerror = () => reject(new Error('Failed to read file'))
-    
-    reader.onload = (e) => {
-      img.src = e.target.result
-    }
-
-    img.onerror = () => reject(new Error('Failed to load image'))
-    
+    reader.onload = (e) => img.src = e.target.result
     img.onload = () => {
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
-
-      // Resize to max 1200px on longest side
-      const maxDimension = 1200
-      let width = img.width
-      let height = img.height
-
-      if (width > height && width > maxDimension) {
-        height = (maxDimension / width) * height
-        width = maxDimension
-      } else if (height > maxDimension) {
-        width = (maxDimension / height) * width
-        height = maxDimension
+      const maxDim = 1200
+      let w = img.width, h = img.height
+      if (w > h && w > maxDim) { h *= maxDim/w; w = maxDim; }
+      else if (h > maxDim) { w *= maxDim/h; h = maxDim; }
+      canvas.width = w; canvas.height = h
+      ctx.drawImage(img, 0, 0, w, h)
+      let q = 0.9
+      const attempt = () => {
+        canvas.toBlob((blob) => {
+          if (blob.size <= targetSizeKB * 1024 || q <= 0.1) resolve(blob)
+          else { q -= 0.1; attempt(); }
+        }, 'image/jpeg', q)
       }
-
-      canvas.width = width
-      canvas.height = height
-      ctx.drawImage(img, 0, 0, width, height)
-
-      let quality = 0.9
-      const targetBytes = targetSizeKB * 1024
-
-      function attemptCompression() {
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              reject(new Error('Failed to compress image'))
-              return
-            }
-
-            if (blob.size <= targetBytes || quality <= 0.1) {
-              resolve(blob)
-            } else {
-              quality -= 0.05
-              attemptCompression()
-            }
-          },
-          'image/jpeg',
-          quality
-        )
-      }
-
-      attemptCompression()
+      attempt()
     }
-
     reader.readAsDataURL(file)
   })
 }
@@ -521,15 +492,12 @@ async function compressImage(file, targetSizeKB = 200) {
 // ========== FORM SUBMISSION ==========
 async function submitForm() {
   try {
-    // Check expiration one final time
     if (checkExpiration()) return
 
-    // Show loading
     document.getElementById('form').style.display = 'none'
-    document.querySelector('.progress').style.display = 'none'
+    document.getElementById('progressBar').style.display = 'none'
     document.getElementById('loading').style.display = 'block'
 
-    // Collect form data
     const formData = {
       artist_name: document.getElementById('artistName').value,
       genre: document.getElementById('genre').value,
@@ -537,98 +505,42 @@ async function submitForm() {
       experience: document.getElementById('experience').value,
       learn_from: document.getElementById('learnFrom').value,
       challenge_me: document.getElementById('challenge').value,
-      terms_accepted: document.getElementById('terms').checked,
+      terms_accepted: document.getElementById('termsCheckbox').checked,
       promotion_consent: document.getElementById('promotion').checked,
       created_at: new Date().toISOString()
     }
 
-    // Upload images to Supabase Storage
     const imageUrls = []
-    
     for (let i = 0; i < uploadedFiles.length; i++) {
-      const file = uploadedFiles[i]
-      
-      try {
-        // Compress image
-        const compressedBlob = await compressImage(file, 200)
-        
-        // Generate unique filename
-        const timestamp = Date.now()
-        const fileName = `champion_${formData.artist_name.replace(/\s+/g, '_')}_${timestamp}_${i}.jpg`
-        
-        // Upload to Supabase Storage
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('champion-images')
-          .upload(fileName, compressedBlob, {
-            contentType: 'image/jpeg',
-            cacheControl: '3600'
-          })
+      const blob = await compressImage(uploadedFiles[i], 200)
+      const fileName = `champion_${Date.now()}_${i}.jpg`
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('champion-images')
+        .upload(fileName, blob)
 
-        if (uploadError) {
-          console.error('Upload error:', uploadError)
-          continue
-        }
-
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from('champion-images')
-          .getPublicUrl(fileName)
-        
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage.from('champion-images').getPublicUrl(fileName)
         imageUrls.push(urlData.publicUrl)
-      } catch (error) {
-        console.error('Error processing image:', error)
       }
     }
-
     formData.images = imageUrls
 
-    // Insert into Supabase database
-    const { data, error } = await supabase
-      .from('champion_profiles')
-      .insert([formData])
-      .select()
+    const { error } = await supabase.from('champion_profiles').insert([formData])
+    if (error) throw error
 
-    if (error) {
-      throw error
-    }
-
-    // Show success message
     document.getElementById('loading').style.display = 'none'
     document.getElementById('success').style.display = 'block'
 
-    console.log('Profile submitted successfully:', data)
-
-  } catch (error) {
-    console.error('Submission error:', error)
-    alert('Error submitting profile: ' + error.message)
-    
-    // Restore form
+  } catch (err) {
+    console.error(err)
+    alert('Submission failed: ' + err.message)
     document.getElementById('loading').style.display = 'none'
     document.getElementById('form').style.display = 'block'
-    document.querySelector('.progress').style.display = 'flex'
+    document.getElementById('progressBar').style.display = 'flex'
   }
 }
 
-// ========== TERMS MODAL ==========
-function openTerms(e) {
-  if (e) e.preventDefault()
-  document.getElementById('terms').classList.add("active")
-  document.getElementById('backdrop').classList.add("active")
-}
-
-function closeTerms() {
-  document.getElementById('terms').classList.remove("active")
-  document.getElementById('backdrop').classList.remove("active")
-}
-
-// ========== EVENT LISTENERS ==========
-document.getElementById('prevBtn').addEventListener('click', prev)
-document.getElementById('nextBtn').addEventListener('click', next)
-document.getElementById('termsLink').addEventListener('click', openTerms)
-document.getElementById('backdrop').addEventListener('click', closeTerms)
-document.getElementById('closeTermsBtn').addEventListener('click', closeTerms)
-
-// ========== FLOATING TROPHIES ==========
+// ========== TROPHY BACKGROUND ==========
 const wrap = document.getElementById("trophies")
 for (let i = 0; i < 18; i++) {
   const t = document.createElement("i")
@@ -636,6 +548,7 @@ for (let i = 0; i < 18; i++) {
   t.style.left = Math.random() * 100 + "%"
   t.style.fontSize = 16 + Math.random() * 24 + "px"
   t.style.animationDuration = 8 + Math.random() * 10 + "s"
+  t.style.animationDelay = Math.random() * 5 + "s"
   wrap.appendChild(t)
 }
 </script>
