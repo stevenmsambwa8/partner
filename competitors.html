@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submissions Gallery</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0f0f0f;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #141414;
+            --border-color: #2a2a2a;
+            --border-hover: #3a3a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #8f8f8f;
+            --text-tertiary: #6f6f6f;
+            --accent: #fe2c55;
+            --accent-hover: #ff4066;
+            --cyan: #25f4ee;
+            --success: #00f2ea;
+            --warning: #ffc107;
+            --error: #ff3b5c;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 14px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-img {
+            height: 32px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-dropdown {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-dropdown:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .back-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-card);
+            border-color: var(--accent);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        /* Gallery Grid */
+        .gallery-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 640px) {
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .gallery-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1400px) {
+            .gallery-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Submission Card */
+        .submission-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .submission-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(254, 44, 85, 0.2);
+        }
+
+        .card-header {
+            padding: 14px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            background: var(--bg-tertiary);
+            flex-shrink: 0;
+        }
+
+        .avatar-fallback {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .user-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: 15px;
+            font-weight: 700;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            margin-bottom: 2px;
+        }
+
+        .user-type {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 8px;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.15);
+            color: var(--warning);
+        }
+
+        .status-approved {
+            background: rgba(37, 244, 238, 0.15);
+            color: var(--success);
+        }
+
+        .status-rejected {
+            background: rgba(255, 59, 92, 0.15);
+            color: var(--error);
+        }
+
+        .card-body {
+            padding: 14px;
+        }
+
+        .task-title {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .submission-content {
+            margin-bottom: 12px;
+        }
+
+        .text-preview {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .audio-indicator {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .audio-indicator i {
+            color: var(--accent);
+        }
+
+        .card-footer {
+            padding: 12px 14px;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        .submission-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        .submission-date {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .view-link {
+            color: var(--accent);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .view-link:hover {
+            color: var(--accent-hover);
+        }
+
+        /* Bottom Sheet */
+        .bottom-sheet-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+
+        .bottom-sheet-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            max-height: 90vh;
+            transform: translateY(100%);
+            transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -4px 40px rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+        }
+
+        .bottom-sheet.active {
+            transform: translateY(0);
+        }
+
+        .sheet-handle {
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            cursor: grab;
+        }
+
+        .handle-bar {
+            width: 40px;
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        .sheet-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .profile-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--border-color);
+            margin: 0 auto 16px;
+            background: var(--bg-tertiary);
+        }
+
+        .avatar-fallback-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            border: 3px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 48px;
+            margin: 0 auto 16px;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .profile-type {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .profile-link {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+
+        .profile-link:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        .copy-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: var(--accent);
+        }
+
+        .detail-box {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: var(--text-primary);
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .detail-value a {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        .detail-value a:hover {
+            color: var(--accent-hover);
+        }
+
+        .audio-player {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .audio-player audio {
+            width: 100%;
+            height: 40px;
+            margin-top: 8px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card);
+            border-color: var(--accent);
+        }
+
+        /* Loading & Empty States */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+        }
+
+        .empty-text {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .empty-subtext {
+            font-size: 14px;
+            color: var(--text-tertiary);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--border-hover);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: var(--bg-primary);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            animation: toastIn 0.3s forwards;
+        }
+
+        @keyframes toastIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 16px;
+            }
+
+            .filter-dropdown {
+                font-size: 13px;
+                padding: 6px 10px;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Auth Modal */
+        .auth-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+
+        .auth-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .auth-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .auth-icon {
+            font-size: 64px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .auth-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .auth-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .auth-actions {
+            display: grid;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo-title">
+                <img src="logo-black.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+                <h1>Submissions Gallery</h1>
+            </div>
+            <div class="header-actions">
+                <select class="filter-dropdown" id="statusFilter">
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+                <select class="filter-dropdown" id="taskFilter">
+                    <option value="all">All Tasks</option>
+                </select>
+                <a href="admin.html" class="back-btn">
+                    <i class="ri-arrow-left-line"></i>
+                    <span>Back</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Gallery Container -->
+    <div class="container">
+        <div id="galleryContainer">
+            <div class="loading">
+                <div class="spinner"></div>
+                <div class="empty-text">Loading submissions...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Sheet for Profile Details -->
+    <div id="profileOverlay" class="bottom-sheet-overlay"></div>
+    <div id="profileSheet" class="bottom-sheet">
+        <div class="sheet-handle">
+            <div class="handle-bar"></div>
+        </div>
+        <div class="sheet-content" id="profileContent">
+            <!-- Profile content will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="auth-modal">
+        <div class="auth-content">
+            <div class="auth-icon">
+                <i class="ri-lock-line"></i>
+            </div>
+            <h2 class="auth-title">Sign Up Required</h2>
+            <p class="auth-text">You need to be registered to view external links. Please sign up or log in to continue.</p>
+            <div class="auth-actions">
+                <a href="index.html" class="btn btn-primary">
+                    <i class="ri-user-add-line"></i>
+                    Sign Up / Login
+                </a>
+                <button class="btn btn-secondary" onclick="closeAuthModal()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const supabaseUrl = 'https://xaudpqhyyxburjazfips.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhdWRwcWh5eXhidXJqYXpmaXBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzMTY1NDUsImV4cCI6MjA3Nzg5MjU0NX0.LxRbfT0TsxJ38dwTQyKhn_Hi1cuZXZ6tpE04YPatGkQ'
+
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+let currentUser = null
+let allSubmissions = []
+let allTasks = []
+
+// Check if user is logged in
+async function checkAuth() {
+    const { data: { user } } = await supabase.auth.getUser()
+    currentUser = user
+    return user
+}
+
+function escapeHtml(unsafe) {
+    if (!unsafe) return ''
+    return ('' + unsafe)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+}
+
+function linkifyText(text) {
+    if (!text) return ''
+    let escaped = escapeHtml(text)
+    const urlRegex = /(https?:\/\/[^\s<]+|www\.[^\s<]+)/g
+    escaped = escaped.replace(urlRegex, (url) => {
+        let href = url
+        if (url.startsWith('www.')) {
+            href = 'https://' + url
+        }
+        return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`
+    })
+    return escaped
+}
+
+async function loadTasks() {
+    try {
+        const { data: tasks, error } = await supabase
+            .from('event_tasks')
+            .select('id, title')
+            .order('created_at', { ascending: false })
+
+        if (error) throw error
+
+        allTasks = tasks || []
+        
+        const taskFilter = document.getElementById('taskFilter')
+        taskFilter.innerHTML = '<option value="all">All Tasks</option>' + 
+            allTasks.map(t => `<option value="${t.id}">${escapeHtml(t.title)}</option>`).join('')
+
+    } catch (error) {
+        console.error('Error loading tasks:', error)
+    }
+}
+
+async function loadSubmissions() {
+    const container = document.getElementById('galleryContainer')
+    
+    try {
+        const { data: submissions, error } = await supabase
+            .from('task_submissions')
+            .select(`
+                *,
+                event_tasks (
+                    id,
+                    title
+                )
+            `)
+            .order('submitted_at', { ascending: false })
+
+        if (error) throw error
+
+        allSubmissions = submissions || []
+        
+        renderSubmissions()
+
+    } catch (error) {
+        console.error('Error loading submissions:', error)
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon"><i class="ri-error-warning-line"></i></div>
+                <div class="empty-text">Error loading submissions</div>
+                <div class="empty-subtext">${escapeHtml(error.message)}</div>
+            </div>
+        `
+    }
+}
+
+function renderSubmissions() {
+    const container = document.getElementById('galleryContainer')
+    const statusFilter = document.getElementById('statusFilter').value
+    const taskFilter = document.getElementById('taskFilter').value
+
+    let filtered = allSubmissions
+
+    // Apply filters
+    if (statusFilter !== 'all') {
+        filtered = filtered.filter(s => s.status === statusFilter)
+    }
+
+    if (taskFilter !== 'all') {
+        filtered = filtered.filter(s => s.task_id === taskFilter)
+    }
+
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon"><i class="ri-inbox-line"></i></div>
+                <div class="empty-text">No submissions found</div>
+                <div class="empty-subtext">Try adjusting your filters</div>
+            </div>
+        `
+        return
+    }
+
+    container.innerHTML = '<div class="gallery-grid">' + filtered.map(s => {
+        const hasImage = s.profile_picture && s.profile_picture.trim() !== ''
+        const taskTitle = s.event_tasks?.title || 'Task'
+
+        return `
+            <div class="submission-card" onclick="openProfile('${s.id}')">
+                <div class="card-header">
+                    <div class="user-info">
+                        ${hasImage ? `
+                            <img src="${s.profile_picture}" 
+                                 class="user-avatar" 
+                                 alt="${escapeHtml(s.user_name)}"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="avatar-fallback" style="display: none;">
+                                <i class="ri-user-3-fill"></i>
+                            </div>
+                        ` : `
+                            <div class="avatar-fallback">
+                                <i class="ri-user-3-fill"></i>
+                            </div>
+                        `}
+                        <div class="user-details">
+                            <div class="user-name">${escapeHtml(s.user_name)}</div>
+                            <div class="user-type">${escapeHtml(s.user_type || 'User')}</div>
+                        </div>
+                    </div>
+                    <span class="status-badge status-${s.status}">
+                        ${s.status === 'pending' ? '<i class="ri-time-line"></i>' : 
+                          s.status === 'approved' ? '<i class="ri-checkbox-circle-line"></i>' : 
+                          '<i class="ri-close-circle-line"></i>'}
+                        ${s.status}
+                    </span>
+                </div>
+
+                <div class="card-body">
+                    <div class="task-title">
+                        <i class="ri-file-list-line"></i>
+                        ${escapeHtml(taskTitle)}
+                    </div>
+
+                    <div class="submission-content">
+                        ${s.text_content ? `
+                            <div class="text-preview">${escapeHtml(s.text_content)}</div>
+                        ` : ''}
+                        
+                        ${s.audio_file ? `
+                            <div class="audio-indicator">
+                                <i class="ri-music-2-line"></i>
+                                Audio attached
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="submission-meta">
+                        <div class="submission-date">
+                            <i class="ri-time-line"></i>
+                            ${new Date(s.submitted_at).toLocaleDateString()}
+                        </div>
+                        <div class="view-link">
+                            View Details
+                            <i class="ri-arrow-right-line"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `
+    }).join('') + '</div>'
+}
+
+window.openProfile = function(submissionId) {
+    const submission = allSubmissions.find(s => s.id === submissionId)
+    if (!submission) return
+
+    const overlay = document.getElementById('profileOverlay')
+    const sheet = document.getElementById('profileSheet')
+    const content = document.getElementById('profileContent')
+
+    const hasImage = submission.profile_picture && submission.profile_picture.trim() !== ''
+    const taskTitle = submission.event_tasks?.title || 'Task'
+    
+    // Generate vynal.dev profile link
+    const stageName = submission.user_name.toLowerCase().replace(/\s+/g, '')
+    const profileUrl = `https://vynal.dev/@${stageName}`
+
+    content.innerHTML = `
+        <div class="profile-header">
+            ${hasImage ? `
+                <img src="${submission.profile_picture}" 
+                     class="profile-avatar-large" 
+                     alt="${escapeHtml(submission.user_name)}"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="avatar-fallback-large" style="display: none;">
+                    <i class="ri-user-3-fill"></i>
+                </div>
+            ` : `
+                <div class="avatar-fallback-large">
+                    <i class="ri-user-3-fill"></i>
+                </div>
+            `}
+            <h2 class="profile-name">${escapeHtml(submission.user_name)}</h2>
+            <div class="profile-type">${escapeHtml(submission.user_type || 'User')}</div>
+            <div class="profile-link">
+                <i class="ri-links-line"></i>
+                <span id="profileUrlText">vynal.dev/@${stageName}</span>
+                <button class="copy-btn" onclick="copyProfileLink('${profileUrl}')">
+                    <i class="ri-file-copy-line"></i> Copy
+                </button>
+            </div>
+            <span class="status-badge status-${submission.status}">
+                ${submission.status === 'pending' ? '<i class="ri-time-line"></i>' : 
+                  submission.status === 'approved' ? '<i class="ri-checkbox-circle-line"></i>' : 
+                  '<i class="ri-close-circle-line"></i>'}
+                ${submission.status}
+            </span>
+        </div>
+
+        <div class="section">
+            <div class="section-title">
+                <i class="ri-file-list-line"></i>
+                Submission Details
+            </div>
+            
+            <div class="detail-box">
+                <div class="detail-label">Task</div>
+                <div class="detail-value">${escapeHtml(taskTitle)}</div>
+            </div>
+
+            <div class="detail-box">
+                <div class="detail-label">Submitted</div>
+                <div class="detail-value">${new Date(submission.submitted_at).toLocaleString()}</div>
+            </div>
+
+            ${submission.points_awarded > 0 ? `
+                <div class="detail-box">
+                    <div class="detail-label">Points Awarded</div>
+                    <div class="detail-value" style="color: var(--warning);">
+                        <i class="ri-medal-line"></i> ${submission.points_awarded} points
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+
+        ${submission.text_content ? `
+            <div class="section">
+                <div class="section-title">
+                    <i class="ri-chat-3-line"></i>
+                    Text Submission
+                </div>
+                <div class="detail-box">
+                    <div class="detail-value">${linkifyText(submission.text_content)}</div>
+                </div>
+            </div>
+        ` : ''}
+
+        ${submission.audio_file ? `
+            <div class="section">
+                <div class="section-title">
+                    <i class="ri-music-2-line"></i>
+                    Audio Submission
+                </div>
+                <div class="audio-player">
+                    <audio controls src="${submission.audio_file}"></audio>
+                </div>
+            </div>
+        ` : ''}
+
+        <div class="action-buttons">
+            <a href="${profileUrl}" class="btn btn-primary" onclick="return checkAuthBeforeLink(event, '${profileUrl}')">
+                <i class="ri-external-link-line"></i>
+                View on Site
+            </a>
+            <button class="btn btn-secondary" onclick="closeProfile()">
+                <i class="ri-close-line"></i>
+                Close
+            </button>
+        </div>
+    `
+
+    overlay.classList.remove('hidden')
+    overlay.classList.add('active')
+    sheet.classList.add('active')
+}
+
+window.closeProfile = function() {
+    const overlay = document.getElementById('profileOverlay')
+    const sheet = document.getElementById('profileSheet')
+    
+    overlay.classList.remove('active')
+    sheet.classList.remove('active')
+    
+    setTimeout(() => {
+        overlay.classList.add('hidden')
+    }, 250)
+}
+
+window.copyProfileLink = function(url) {
+    navigator.clipboard.writeText(url).then(() => {
+        showToast('Link copied to clipboard!')
+    }).catch(() => {
+        showToast('Failed to copy link')
+    })
+}
+
+window.checkAuthBeforeLink = function(event, url) {
+    if (!currentUser) {
+        event.preventDefault()
+        showAuthModal()
+        return false
+    }
+    return true
+}
+
+function showAuthModal() {
+    const modal = document.getElementById('authModal')
+    modal.classList.add('active')
+}
+
+window.closeAuthModal = function() {
+    const modal = document.getElementById('authModal')
+    modal.classList.remove('active')
+}
+
+function showToast(message) {
+    const toast = document.createElement('div')
+    toast.className = 'toast'
+    toast.innerHTML = `<i class="ri-checkbox-circle-fill"></i> ${message}`
+    document.body.appendChild(toast)
+    
+    setTimeout(() => {
+        toast.style.opacity = '0'
+        setTimeout(() => toast.remove(), 300)
+    }, 2500)
+}
+
+// Event listeners
+document.getElementById('statusFilter').addEventListener('change', renderSubmissions)
+document.getElementById('taskFilter').addEventListener('change', renderSubmissions)
+document.getElementById('profileOverlay').addEventListener('click', closeProfile)
+
+// Initialize
+async function init() {
+    await checkAuth()
+    await loadTasks()
+    await loadSubmissions()
+}
+
+init()
+</script>
+
+</body>
+</html>
