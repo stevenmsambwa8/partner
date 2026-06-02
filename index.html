@@ -3,90 +3,118 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>World Cup Teams</title>
+<title>FIFA World Cup 2026</title>
 
 <style>
 body{
-    background:#08142d;
-    color:white;
-    font-family:Arial,sans-serif;
-    padding:20px;
+  background:#08142d;
+  color:white;
+  font-family:Arial,sans-serif;
+  padding:20px;
 }
 
-#status{
-    margin-bottom:20px;
-    padding:10px;
-    background:#111;
-    border-radius:8px;
+h1{
+  text-align:center;
+}
+
+select{
+  width:100%;
+  padding:12px;
+  margin:20px 0;
+  border-radius:8px;
+  border:none;
 }
 
 .team{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    background:#102040;
-    margin-bottom:10px;
-    padding:10px;
-    border-radius:10px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:#102040;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:10px;
 }
 
 .team img{
-    width:40px;
-    height:30px;
-    object-fit:cover;
+  width:50px;
+  height:35px;
+  object-fit:cover;
+}
+
+.loading{
+  text-align:center;
+  padding:20px;
 }
 </style>
 </head>
 <body>
 
-<h1>⚽ Group A Teams</h1>
+<h1>⚽ FIFA World Cup 2026</h1>
 
-<div id="status">Loading...</div>
+<select id="groupSelect">
+  <option>A</option>
+  <option>B</option>
+  <option>C</option>
+  <option>D</option>
+  <option>E</option>
+  <option>F</option>
+  <option>G</option>
+  <option>H</option>
+  <option>I</option>
+  <option>J</option>
+  <option>K</option>
+  <option>L</option>
+</select>
 
-<div id="teams"></div>
+<div id="teams">
+  <div class="loading">Loading...</div>
+</div>
 
 <script>
-async function loadTeams() {
 
-    const status = document.getElementById("status");
+const teamsEl = document.getElementById("teams");
+const groupSelect = document.getElementById("groupSelect");
 
-    try {
+async function loadTeams(group="A") {
 
-        const res = await fetch(
-            "https://worldcup26.ir/get/teams?group=A"
-        );
+  teamsEl.innerHTML =
+    '<div class="loading">Loading...</div>';
 
-        status.innerHTML =
-            "HTTP Status: " + res.status;
+  try {
 
-        const data = await res.json();
+    const res = await fetch(
+      `/api/teams?group=${group}`
+    );
 
-        console.log(data);
+    const data = await res.json();
 
-        const teams =
-            data.teams || data;
+    const teams = data.teams || [];
 
-        document.getElementById("teams").innerHTML =
-            teams.map(team => `
-                <div class="team">
-                    <img src="${team.flag}">
-                    <div>
-                        ${team.name_en}
-                    </div>
-                </div>
-            `).join("");
+    teamsEl.innerHTML = teams.map(team => `
+      <div class="team">
+        <img src="${team.flag}" alt="">
+        <div>
+          <strong>${team.name_en}</strong><br>
+          FIFA Code: ${team.fifa_code}
+        </div>
+      </div>
+    `).join("");
 
-    } catch(err) {
+  } catch(err) {
 
-        status.innerHTML =
-            "ERROR: " + err;
+    teamsEl.innerHTML =
+      `<div class="loading">${err}</div>`;
 
-        console.error(err);
-
-    }
+  }
 }
 
+groupSelect.addEventListener(
+  "change",
+  () => loadTeams(groupSelect.value)
+);
+
 loadTeams();
+
 </script>
 
 </body>
