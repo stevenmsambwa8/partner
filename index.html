@@ -2,178 +2,253 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>World Cup 2026 Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIFA World Cup 2026 Groups</title>
 
 <style>
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
+    font-family:Arial, sans-serif;
 }
 
 body{
-    background:#08142d;
-    color:#fff;
-    font-family:Arial,sans-serif;
-}
-
-header{
+    background:#0b1220;
+    color:white;
     padding:20px;
+}
+
+h1{
     text-align:center;
-    background:#102040;
+    margin-bottom:30px;
 }
 
-nav{
-    display:flex;
-    gap:10px;
-    padding:15px;
-    overflow:auto;
+.groups-container{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(350px,1fr));
+    gap:20px;
 }
 
-button{
-    border:none;
-    background:#1a2f5a;
-    color:#fff;
-    padding:12px 16px;
-    border-radius:10px;
-    cursor:pointer;
-    white-space:nowrap;
-}
-
-button:hover{
-    background:#28447f;
-}
-
-#status{
-    padding:15px;
-    color:#9fb4e8;
-}
-
-#content{
-    padding:15px;
-}
-
-pre{
+.group-card{
     background:#111827;
+    border-radius:16px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.1);
+}
+
+.group-header{
+    background:#1e293b;
     padding:15px;
-    border-radius:12px;
-    overflow:auto;
-    white-space:pre-wrap;
-    word-break:break-word;
+    font-size:20px;
+    font-weight:bold;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#1f2937;
+    padding:10px;
+    font-size:13px;
+}
+
+td{
+    padding:10px;
+    border-top:1px solid rgba(255,255,255,.05);
+    text-align:center;
+}
+
+.team-cell{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    text-align:left;
+}
+
+.team-cell img{
+    width:24px;
+    height:18px;
+    object-fit:cover;
+    border-radius:2px;
+}
+
+.rank{
+    width:24px;
+    display:inline-block;
+    font-weight:bold;
+}
+
+.qualify{
+    border-left:4px solid #22c55e;
+}
+
+.third{
+    border-left:4px solid #f59e0b;
 }
 </style>
 </head>
 <body>
 
-<header>
-    <h1>⚽ FIFA World Cup 2026</h1>
-    <p>Powered by your Vercel proxy</p>
-</header>
+<h1>⚽ FIFA World Cup 2026 Groups</h1>
 
-<nav>
-    <button onclick="loadData('get/groups')">
-        Groups
-    </button>
-
-    <button onclick="loadData('get/teams?group=A')">
-        Group A Teams
-    </button>
-
-    <button onclick="loadData('get/teams?group=B')">
-        Group B Teams
-    </button>
-
-    <button onclick="loadData('get/games')">
-        Matches
-    </button>
-
-    <button onclick="loadData('get/stadiums')">
-        Stadiums
-    </button>
-
-    <button onclick="loadData('api/health')">
-        Health
-    </button>
-</nav>
-
-<div id="status">
-    Ready
-</div>
-
-<div id="content">
-    Select an endpoint above.
-</div>
+<div id="groups" class="groups-container"></div>
 
 <script>
 
-const statusBox =
-    document.getElementById("status");
+// TEAMS API RESPONSE
+const teams = [
+{
+id:"1",
+name_en:"Mexico",
+flag:"https://flagcdn.com/w80/mx.png",
+groups:"A"
+},
+{
+id:"2",
+name_en:"South Africa",
+flag:"https://flagcdn.com/w80/za.png",
+groups:"A"
+},
+{
+id:"3",
+name_en:"South Korea",
+flag:"https://flagcdn.com/w80/kr.png",
+groups:"A"
+},
+{
+id:"4",
+name_en:"Czech Republic",
+flag:"https://flagcdn.com/w80/cz.png",
+groups:"A"
+}
+];
 
-const contentBox =
-    document.getElementById("content");
+// GROUPS API RESPONSE
+const groups = [
+{
+name:"A",
+teams:[
+{
+team_id:"1",
+mp:"0",
+w:"0",
+d:"0",
+l:"0",
+gf:"0",
+ga:"0",
+gd:"0",
+pts:"0"
+},
+{
+team_id:"2",
+mp:"0",
+w:"0",
+d:"0",
+l:"0",
+gf:"0",
+ga:"0",
+gd:"0",
+pts:"0"
+},
+{
+team_id:"3",
+mp:"0",
+w:"0",
+d:"0",
+l:"0",
+gf:"0",
+ga:"0",
+gd:"0",
+pts:"0"
+},
+{
+team_id:"4",
+mp:"0",
+w:"0",
+d:"0",
+l:"0",
+gf:"0",
+ga:"0",
+gd:"0",
+pts:"0"
+}
+]
+];
 
-async function loadData(endpoint){
+const container = document.getElementById("groups");
 
-    try{
+function renderGroups() {
 
-        statusBox.innerHTML =
-            "Loading: " + endpoint;
+    container.innerHTML = "";
 
-        contentBox.innerHTML =
-            "Loading...";
+    groups.forEach(group => {
 
-        const url =
-            "/api/worldcup?endpoint=" +
-            encodeURIComponent(endpoint);
+        const mergedTeams = group.teams
+            .map(row => ({
+                ...row,
+                ...teams.find(t => t.id === row.team_id)
+            }))
+            .sort((a,b)=>b.pts-a.pts);
 
-        const response =
-            await fetch(url);
+        const card = document.createElement("div");
+        card.className = "group-card";
 
-        const text =
-            await response.text();
+        card.innerHTML = `
+            <div class="group-header">
+                Group ${group.name}
+            </div>
 
-        statusBox.innerHTML =
-            "HTTP " + response.status;
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th style="text-align:left">Team</th>
+                        <th>MP</th>
+                        <th>W</th>
+                        <th>D</th>
+                        <th>L</th>
+                        <th>GD</th>
+                        <th>PTS</th>
+                    </tr>
+                </thead>
 
-        try{
+                <tbody>
+                ${mergedTeams.map((team,index)=>`
+                    <tr class="${
+                        index < 2 ? "qualify" :
+                        index === 2 ? "third" : ""
+                    }">
 
-            const json =
-                JSON.parse(text);
+                        <td>${index+1}</td>
 
-            contentBox.innerHTML =
-                "<pre>" +
-                JSON.stringify(
-                    json,
-                    null,
-                    2
-                ) +
-                "</pre>";
+                        <td>
+                            <div class="team-cell">
+                                <img src="${team.flag}">
+                                ${team.name_en}
+                            </div>
+                        </td>
 
-        }catch{
+                        <td>${team.mp}</td>
+                        <td>${team.w}</td>
+                        <td>${team.d}</td>
+                        <td>${team.l}</td>
+                        <td>${team.gd}</td>
+                        <td><b>${team.pts}</b></td>
 
-            contentBox.innerHTML =
-                "<pre>" +
-                text +
-                "</pre>";
+                    </tr>
+                `).join("")}
+                </tbody>
+            </table>
+        `;
 
-        }
-
-    }catch(error){
-
-        statusBox.innerHTML =
-            "Error";
-
-        contentBox.innerHTML =
-            "<pre>" +
-            error +
-            "</pre>";
-
-    }
-
+        container.appendChild(card);
+    });
 }
 
-loadData("api/health");
+renderGroups();
 
 </script>
 
