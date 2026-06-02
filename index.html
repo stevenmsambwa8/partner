@@ -1,119 +1,179 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FIFA World Cup 2026</title>
+<title>World Cup 2026 Dashboard</title>
 
 <style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
 body{
-  background:#08142d;
-  color:white;
-  font-family:Arial,sans-serif;
-  padding:20px;
+    background:#08142d;
+    color:#fff;
+    font-family:Arial,sans-serif;
 }
 
-h1{
-  text-align:center;
+header{
+    padding:20px;
+    text-align:center;
+    background:#102040;
 }
 
-select{
-  width:100%;
-  padding:12px;
-  margin:20px 0;
-  border-radius:8px;
-  border:none;
+nav{
+    display:flex;
+    gap:10px;
+    padding:15px;
+    overflow:auto;
 }
 
-.team{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  background:#102040;
-  padding:12px;
-  margin-bottom:10px;
-  border-radius:10px;
+button{
+    border:none;
+    background:#1a2f5a;
+    color:#fff;
+    padding:12px 16px;
+    border-radius:10px;
+    cursor:pointer;
+    white-space:nowrap;
 }
 
-.team img{
-  width:50px;
-  height:35px;
-  object-fit:cover;
+button:hover{
+    background:#28447f;
 }
 
-.loading{
-  text-align:center;
-  padding:20px;
+#status{
+    padding:15px;
+    color:#9fb4e8;
+}
+
+#content{
+    padding:15px;
+}
+
+pre{
+    background:#111827;
+    padding:15px;
+    border-radius:12px;
+    overflow:auto;
+    white-space:pre-wrap;
+    word-break:break-word;
 }
 </style>
 </head>
 <body>
 
-<h1>⚽ FIFA World Cup 2026</h1>
+<header>
+    <h1>⚽ FIFA World Cup 2026</h1>
+    <p>Powered by your Vercel proxy</p>
+</header>
 
-<select id="groupSelect">
-  <option>A</option>
-  <option>B</option>
-  <option>C</option>
-  <option>D</option>
-  <option>E</option>
-  <option>F</option>
-  <option>G</option>
-  <option>H</option>
-  <option>I</option>
-  <option>J</option>
-  <option>K</option>
-  <option>L</option>
-</select>
+<nav>
+    <button onclick="loadData('get/groups')">
+        Groups
+    </button>
 
-<div id="teams">
-  <div class="loading">Loading...</div>
+    <button onclick="loadData('get/teams?group=A')">
+        Group A Teams
+    </button>
+
+    <button onclick="loadData('get/teams?group=B')">
+        Group B Teams
+    </button>
+
+    <button onclick="loadData('get/games')">
+        Matches
+    </button>
+
+    <button onclick="loadData('get/stadiums')">
+        Stadiums
+    </button>
+
+    <button onclick="loadData('api/health')">
+        Health
+    </button>
+</nav>
+
+<div id="status">
+    Ready
+</div>
+
+<div id="content">
+    Select an endpoint above.
 </div>
 
 <script>
 
-const teamsEl = document.getElementById("teams");
-const groupSelect = document.getElementById("groupSelect");
+const statusBox =
+    document.getElementById("status");
 
-async function loadTeams(group="A") {
+const contentBox =
+    document.getElementById("content");
 
-  teamsEl.innerHTML =
-    '<div class="loading">Loading...</div>';
+async function loadData(endpoint){
 
-  try {
+    try{
 
-    const res = await fetch(
-      `/api/teams?group=${group}`
-    );
+        statusBox.innerHTML =
+            "Loading: " + endpoint;
 
-    const data = await res.json();
+        contentBox.innerHTML =
+            "Loading...";
 
-    const teams = data.teams || [];
+        const url =
+            "/api/worldcup?endpoint=" +
+            encodeURIComponent(endpoint);
 
-    teamsEl.innerHTML = teams.map(team => `
-      <div class="team">
-        <img src="${team.flag}" alt="">
-        <div>
-          <strong>${team.name_en}</strong><br>
-          FIFA Code: ${team.fifa_code}
-        </div>
-      </div>
-    `).join("");
+        const response =
+            await fetch(url);
 
-  } catch(err) {
+        const text =
+            await response.text();
 
-    teamsEl.innerHTML =
-      `<div class="loading">${err}</div>`;
+        statusBox.innerHTML =
+            "HTTP " + response.status;
 
-  }
+        try{
+
+            const json =
+                JSON.parse(text);
+
+            contentBox.innerHTML =
+                "<pre>" +
+                JSON.stringify(
+                    json,
+                    null,
+                    2
+                ) +
+                "</pre>";
+
+        }catch{
+
+            contentBox.innerHTML =
+                "<pre>" +
+                text +
+                "</pre>";
+
+        }
+
+    }catch(error){
+
+        statusBox.innerHTML =
+            "Error";
+
+        contentBox.innerHTML =
+            "<pre>" +
+            error +
+            "</pre>";
+
+    }
+
 }
 
-groupSelect.addEventListener(
-  "change",
-  () => loadTeams(groupSelect.value)
-);
-
-loadTeams();
+loadData("api/health");
 
 </script>
 
