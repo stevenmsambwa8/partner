@@ -20,7 +20,7 @@
 
   <div class="header is-fixed">
     <div class="tf-container">
-      <div class="tf-statusbar d-flex justify-content-center align-items-center" style="min-height:60px;position:relative;">
+      <div class="tf-statusbar justify-content-center">
         <a href="index.html" class="back-btn"><i class="icon-left"></i></a>
         <h3>Maombi Yangu</h3>
       </div>
@@ -62,7 +62,7 @@
 
   <style>
     .filter-tab { background:#fff; border:1.5px solid var(--wakala-border); border-radius:20px; padding:6px 16px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; color:var(--wakala-text-muted); transition:all 0.2s; }
-    .filter-tab.active { background:var(--wakala-green); border-color:var(--wakala-green); color:#fff; }
+    .filter-tab.active { background:var(--wakala-primary); border-color:var(--wakala-primary); color:#fff; }
   </style>
 
   <script type="module" src="firebase-init.js"></script>
@@ -90,7 +90,7 @@
     function renderList(list) {
       const el = document.getElementById('list-container');
       if (list.length === 0) {
-        el.innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="icon-request" style="font-size:48px;color:var(--wakala-border);"></i></div><h4>Hakuna Maombi</h4><p>Hakuna maombi yanayolingana na kichujio hiki</p></div>`;
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="icon-request" style="font-size:48px;color:var(--wakala-text-muted);opacity:0.5;"></i></div><h4>Hakuna Maombi</h4><p>Hakuna maombi yanayolingana na kichujio hiki</p></div>`;
         return;
       }
       el.innerHTML = list.map(r => `
@@ -101,7 +101,7 @@
           </div>
           <p class="req-name">${r.details.jina || 'Ombi'}</p>
           <p class="req-sub">${r.id} · ${formatDate(r.tarehe)}</p>
-          ${r.adminNote ? `<p style="font-size:12px;color:var(--wakala-green);margin:6px 0 0;">💬 ${r.adminNote}</p>` : ''}
+          ${r.adminNote ? `<p style="font-size:12px;color:var(--wakala-primary);margin:6px 0 0;display:flex;gap:5px;align-items:flex-start;"><i class="icon-info" style="margin-top:1px;flex-shrink:0;"></i><span>${r.adminNote}</span></p>` : ''}
         </a>
       `).join('');
     }

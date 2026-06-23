@@ -17,17 +17,19 @@
   </div>
 
   <!-- Admin Header -->
-  <div class="header is-fixed" style="background:#1A1A2E;">
+  <div class="header is-fixed header-admin">
     <div class="tf-container">
-      <div class="tf-statusbar d-flex justify-content-between align-items-center">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="font-size:22px;">🛡️</div>
-          <div>
+      <div class="tf-statusbar header-row d-flex align-items-center">
+        <div class="hdr-flex-text" style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="icon-secure1" style="font-size:17px;color:#fff;"></i>
+          </div>
+          <div class="hdr-flex-text">
             <p style="margin:0;font-size:10px;color:rgba(255,255,255,0.6);">Panel ya Msimamizi</p>
             <h4 style="margin:0;font-size:13px;font-weight:700;color:#fff;">Wakala Point Admin</h4>
           </div>
         </div>
-        <a href="#" onclick="doLogout()" style="color:rgba(255,255,255,0.7);font-size:12px;text-decoration:none;">Toka 🚪</a>
+        <a href="#" onclick="doLogout()" style="color:rgba(255,255,255,0.7);font-size:12px;text-decoration:none;flex-shrink:0;">Toka</a>
       </div>
     </div>
   </div>
@@ -39,19 +41,19 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
         <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:var(--wakala-shadow);">
           <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Maombi Yote</p>
-          <h2 id="stat-total" style="font-size:28px;font-weight:800;color:var(--wakala-green);margin:0;"></h2>
+          <h2 id="stat-total" style="font-size:28px;font-weight:800;color:var(--wakala-primary);margin:0;"></h2>
         </div>
         <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:var(--wakala-shadow);">
           <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Yanasubiri</p>
-          <h2 id="stat-pending" style="font-size:28px;font-weight:800;color:#E03E3E;margin:0;"></h2>
+          <h2 id="stat-pending" style="font-size:28px;font-weight:800;color:var(--wakala-accent);margin:0;"></h2>
         </div>
         <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:var(--wakala-shadow);">
           <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Yanashughulikiwa</p>
-          <h2 id="stat-processing" style="font-size:28px;font-weight:800;color:#0A6EBD;margin:0;"></h2>
+          <h2 id="stat-processing" style="font-size:28px;font-weight:800;color:#1D5FA8;margin:0;"></h2>
         </div>
         <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:var(--wakala-shadow);">
           <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Yamekubaliwa</p>
-          <h2 id="stat-approved" style="font-size:28px;font-weight:800;color:var(--wakala-green);margin:0;"></h2>
+          <h2 id="stat-approved" style="font-size:28px;font-weight:800;color:var(--wakala-primary);margin:0;"></h2>
         </div>
       </div>
 
@@ -67,8 +69,9 @@
       </div>
 
       <!-- Search -->
-      <div class="group-input" style="margin-bottom:14px;">
-        <input type="text" id="search-input" placeholder="🔍 Tafuta kwa jina, simu, au ID..." oninput="searchRequests()" style="border-radius:12px;">
+      <div class="group-input" style="margin-bottom:14px;position:relative;">
+        <i class="icon-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--wakala-text-muted);font-size:16px;"></i>
+        <input type="text" id="search-input" placeholder="Tafuta kwa jina, simu, au ID..." oninput="searchRequests()" style="border-radius:12px;padding-left:38px;">
       </div>
 
       <div id="admin-list"></div>
@@ -78,10 +81,10 @@
   <!-- Admin Detail Modal -->
   <div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;overflow-y:auto;" onclick="closeModal(event)">
     <div id="modal-box" style="background:#fff;margin:20px 16px;border-radius:20px;overflow:hidden;">
-      <div style="background:var(--wakala-green);padding:20px;color:#fff;">
+      <div style="background:var(--wakala-primary);padding:20px;color:#fff;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <h3 id="modal-title" style="font-size:16px;font-weight:700;margin:0;"></h3>
-          <button onclick="closeModal(null)" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;">✕</button>
+          <button onclick="closeModal(null)" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;"><i class="icon-close1" style="font-size:14px;position:static;color:#fff;"></i></button>
         </div>
         <div style="margin-top:10px;display:flex;gap:16px;">
           <div><p style="font-size:10px;opacity:0.7;margin:0;">ID</p><p id="modal-id" style="font-size:13px;font-weight:700;margin:0;"></p></div>
@@ -94,15 +97,15 @@
         <div id="modal-details"></div>
 
         <hr class="divider">
-        <p class="section-title">⚙️ Simamia Ombi</p>
+        <p class="section-title" style="display:flex;align-items:center;gap:6px;"><i class="icon-setting1"></i> Simamia Ombi</p>
 
         <div class="group-input">
           <label>Badilisha Hali</label>
           <select id="modal-new-status">
             <option value="pending">Inasubiri</option>
             <option value="processing">Inashughulikiwa</option>
-            <option value="approved">Imekubaliwa ✅</option>
-            <option value="rejected">Imekataliwa ❌</option>
+            <option value="approved">Imekubaliwa</option>
+            <option value="rejected">Imekataliwa</option>
           </select>
         </div>
         <div class="group-input">
@@ -110,14 +113,14 @@
           <textarea id="modal-admin-note" rows="3" style="resize:none;font-size:14px;" placeholder="Andika ujumbe utakaoonekana kwa mteja..."></textarea>
         </div>
 
-        <button class="tf-btn accent large" onclick="saveAdminAction()">💾 Hifadhi Mabadiliko</button>
+        <button class="tf-btn accent large" style="display:flex;align-items:center;justify-content:center;gap:8px;" onclick="saveAdminAction()"><i class="icon-checkmark"></i> Hifadhi Mabadiliko</button>
       </div>
     </div>
   </div>
 
   <style>
     .filter-tab { background:#fff; border:1.5px solid var(--wakala-border); border-radius:20px; padding:6px 14px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap; color:var(--wakala-text-muted); transition:all 0.2s; }
-    .filter-tab.active { background:#1A1A2E; border-color:#1A1A2E; color:#fff; }
+    .filter-tab.active { background:var(--wakala-primary); border-color:var(--wakala-primary); color:#fff; }
     .admin-req-card { background:#fff; border-radius:14px; padding:16px; margin-bottom:10px; box-shadow:var(--wakala-shadow); border:1px solid var(--wakala-border); cursor:pointer; transition:all 0.2s; }
     .admin-req-card:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(0,0,0,0.12); }
   </style>
@@ -181,13 +184,13 @@
     function renderAdminList(list) {
       const el = document.getElementById('admin-list');
       if (list.length === 0) {
-        el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><h4>Hakuna Maombi</h4><p>Hakuna yanayolingana na hali uliyochagua</p></div>`;
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="icon-request" style="font-size:40px;color:var(--wakala-text-muted);opacity:0.5;"></i></div><h4>Hakuna Maombi</h4><p>Hakuna yanayolingana na hali uliyochagua</p></div>`;
         return;
       }
       el.innerHTML = list.map(r => `
         <div class="admin-req-card" onclick="openModal('${r.id}')">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-            <span style="font-size:12px;font-weight:700;color:var(--wakala-green);">${serviceLabel(r.type)}</span>
+            <span style="font-size:12px;font-weight:700;color:var(--wakala-primary);">${serviceLabel(r.type)}</span>
             ${statusBadge(r.status)}
           </div>
           <p style="font-size:15px;font-weight:700;margin:0 0 4px;">${r.details.jina || r.userName}</p>
@@ -260,17 +263,17 @@
         document.getElementById('modal-overlay').style.display = 'none';
         document.body.style.overflow = '';
         activeReqId = null;
-        showToast('Mabadiliko yamehifadhiwa! ✅');
+        showToast('Mabadiliko yamehifadhiwa!');
       } catch (e) {
         showToast('Hitilafu imetokea. Jaribu tena.');
       } finally {
-        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Hifadhi Mabadiliko'; }
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<i class="icon-checkmark"></i> Hifadhi Mabadiliko'; }
       }
     }
 
     function showToast(msg) {
       const t = document.createElement('div');
-      t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A2E;color:#fff;padding:10px 24px;border-radius:30px;font-size:13px;font-weight:600;z-index:9999;';
+      t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--wakala-primary-dark);color:#fff;padding:10px 24px;border-radius:30px;font-size:13px;font-weight:600;z-index:9999;';
       t.textContent = msg;
       document.body.appendChild(t);
       setTimeout(() => t.remove(), 2500);

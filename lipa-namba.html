@@ -20,7 +20,7 @@
 
   <div class="header is-fixed">
     <div class="tf-container">
-      <div class="tf-statusbar d-flex justify-content-center align-items-center" style="min-height:60px;position:relative;">
+      <div class="tf-statusbar justify-content-center">
         <a href="index.html" class="back-btn"><i class="icon-left"></i></a>
         <h3>Omba Lipa Namba</h3>
       </div>
@@ -31,13 +31,14 @@
     <div class="tf-container" style="padding:16px;">
 
       <!-- Info Box -->
-      <div class="alert-info-box">
-        📱 <strong>Lipa Namba</strong> ni namba ya kipekee inayokuwezesha kupokea malipo ya simu kwa biashara yako. Ni kama akaunti ya malipo ya kidijitali.
+      <div class="alert-info-box" style="display:flex;gap:8px;align-items:flex-start;">
+        <i class="icon-info" style="flex-shrink:0;margin-top:2px;"></i>
+        <span><strong>Lipa Namba</strong> ni namba ya kipekee inayokuwezesha kupokea malipo ya simu kwa biashara yako. Ni kama akaunti ya malipo ya kidijitali.</span>
       </div>
 
       <!-- Form -->
       <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:var(--wakala-shadow);">
-        <p class="section-title" style="margin-bottom:16px;">📋 Taarifa za Mwombaji</p>
+        <p class="section-title" style="margin-bottom:16px;display:flex;align-items:center;gap:6px;"><i class="icon-user-outline"></i> Taarifa za Mwombaji</p>
 
         <div class="group-input">
           <label>Jina Kamili *</label>
@@ -67,7 +68,7 @@
         </div>
 
         <hr class="divider">
-        <p class="section-title" style="margin-bottom:16px;">🏪 Taarifa za Biashara</p>
+        <p class="section-title" style="margin-bottom:16px;display:flex;align-items:center;gap:6px;"><i class="icon-app-store"></i> Taarifa za Biashara</p>
 
         <div class="group-input">
           <label>Jina la Biashara *</label>
@@ -95,7 +96,7 @@
         </div>
 
         <hr class="divider">
-        <p class="section-title" style="margin-bottom:16px;">📍 Mahali pa Biashara</p>
+        <p class="section-title" style="margin-bottom:16px;display:flex;align-items:center;gap:6px;"><i class="icon-location"></i> Mahali pa Biashara</p>
 
         <div class="group-input">
           <label>Mkoa *</label>
@@ -130,7 +131,7 @@
         </div>
 
         <hr class="divider">
-        <p class="section-title" style="margin-bottom:16px;">💬 Maelezo Zaidi</p>
+        <p class="section-title" style="margin-bottom:16px;display:flex;align-items:center;gap:6px;"><i class="icon-info"></i> Maelezo Zaidi</p>
 
         <div class="group-input">
           <label>Maelezo ya Ziada (hiari)</label>
@@ -139,7 +140,7 @@
 
         <p id="err-msg" style="color:var(--wakala-red);font-size:13px;display:none;margin-bottom:12px;"></p>
 
-        <button class="tf-btn accent large" onclick="submitLipaNamba()">📤 Tuma Ombi</button>
+        <button class="tf-btn accent large" style="display:flex;align-items:center;justify-content:center;gap:8px;" onclick="submitLipaNamba()"><i class="icon-send"></i> Tuma Ombi</button>
       </div>
 
       <div style="height:20px;"></div>
@@ -182,7 +183,7 @@
       } catch (e) {
         err.textContent = 'Hitilafu imetokea. Tafadhali jaribu tena.';
         err.style.display = 'block';
-        if (btn) { btn.disabled = false; btn.textContent = '📤 Tuma Ombi'; }
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="icon-send"></i> Tuma Ombi'; }
       }
     }
   </script>

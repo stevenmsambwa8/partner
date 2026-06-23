@@ -20,7 +20,7 @@
 
   <div class="header is-fixed">
     <div class="tf-container">
-      <div class="tf-statusbar d-flex justify-content-center align-items-center" style="min-height:60px;position:relative;">
+      <div class="tf-statusbar justify-content-center">
         <a href="index.html" class="back-btn"><i class="icon-left"></i></a>
         <h3>Omba Till ya Uwakala</h3>
       </div>
@@ -30,12 +30,13 @@
   <div id="app-wrap" style="padding-top:72px;padding-bottom:76px;">
     <div class="tf-container" style="padding:16px;">
 
-      <div class="alert-info-box">
-        🏪 <strong>Till ya Uwakala</strong> inakuwezesha kutoa na kupokea fedha kwa wateja, na kupata mapato kutoka kwa kampuni za simu.
+      <div class="alert-info-box" style="display:flex;gap:8px;align-items:flex-start;">
+        <i class="icon-app-store" style="flex-shrink:0;margin-top:2px;"></i>
+        <span><strong>Till ya Uwakala</strong> inakuwezesha kutoa na kupokea fedha kwa wateja, na kupata mapato kutoka kwa kampuni za simu.</span>
       </div>
 
       <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:var(--wakala-shadow);">
-        <p class="section-title" style="margin-bottom:16px;">👤 Taarifa za Mwombaji</p>
+        <p class="section-title" style="margin-bottom:16px;display:flex;align-items:center;gap:6px;"><i class="icon-user-outline"></i> Taarifa za Mwombaji</p>
 
         <div class="group-input">
           <label>Jina Kamili *</label>
@@ -65,7 +66,7 @@
         </div>
 
         <hr class="divider">
-        <p class="section-title" style="margin-bottom:16px;">📡 Taarifa za Mtandao</p>
+        <p class="section-title" style="margin-bottom:16px;display:flex;align-items:center;gap:6px;"><i class="icon-wifi"></i> Taarifa za Mtandao</p>
 
         <div class="group-input">
           <label>Mtandao wa Simu Unaohitajika *</label>
@@ -102,7 +103,7 @@
         </div>
 
         <hr class="divider">
-        <p class="section-title" style="margin-bottom:16px;">📍 Eneo la Wakala</p>
+        <p class="section-title" style="margin-bottom:16px;display:flex;align-items:center;gap:6px;"><i class="icon-location"></i> Eneo la Wakala</p>
 
         <div class="group-input">
           <label>Mkoa *</label>
@@ -146,7 +147,7 @@
         </div>
 
         <hr class="divider">
-        <p class="section-title" style="margin-bottom:16px;">💰 Uwezo wa Mtaji</p>
+        <p class="section-title" style="margin-bottom:16px;display:flex;align-items:center;gap:6px;"><i class="icon-wallet1"></i> Uwezo wa Mtaji</p>
 
         <div class="group-input">
           <label>Mtaji Unaokusudia Kuanza Nao *</label>
@@ -170,7 +171,7 @@
         </div>
 
         <hr class="divider">
-        <p class="section-title" style="margin-bottom:16px;">🏬 Sehemu ya Wakala</p>
+        <p class="section-title" style="margin-bottom:16px;display:flex;align-items:center;gap:6px;"><i class="icon-home2"></i> Sehemu ya Wakala</p>
 
         <div class="group-input">
           <label>Una Mahali (Duka/Ofisi)? *</label>
@@ -194,7 +195,7 @@
 
         <p id="err-msg" style="color:var(--wakala-red);font-size:13px;display:none;margin-bottom:12px;"></p>
 
-        <button class="tf-btn accent large" onclick="submitTill()">📤 Tuma Ombi</button>
+        <button class="tf-btn accent large" style="display:flex;align-items:center;justify-content:center;gap:8px;" onclick="submitTill()"><i class="icon-send"></i> Tuma Ombi</button>
       </div>
 
       <div style="height:20px;"></div>
@@ -250,7 +251,7 @@
       } catch (e) {
         err.textContent = 'Hitilafu imetokea. Tafadhali jaribu tena.';
         err.style.display = 'block';
-        if (btn) { btn.disabled = false; btn.textContent = '📤 Tuma Ombi'; }
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="icon-send"></i> Tuma Ombi'; }
       }
     }
   </script>

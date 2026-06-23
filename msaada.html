@@ -20,7 +20,7 @@
 
   <div class="header is-fixed">
     <div class="tf-container">
-      <div class="tf-statusbar d-flex justify-content-center align-items-center" style="min-height:60px;position:relative;">
+      <div class="tf-statusbar justify-content-center">
         <a href="profile.html" class="back-btn"><i class="icon-left"></i></a>
         <h3>Msaada & Maswali</h3>
       </div>
@@ -31,13 +31,15 @@
     <div class="tf-container" style="padding:16px;">
 
       <!-- Contact Buttons -->
-      <div style="background:var(--wakala-green);border-radius:16px;padding:20px;color:#fff;margin-bottom:16px;text-align:center;">
-        <div style="font-size:32px;margin-bottom:8px;">📞</div>
+      <div style="background:var(--wakala-primary);border-radius:16px;padding:20px;color:#fff;margin-bottom:16px;text-align:center;">
+        <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+          <i class="icon-phone" style="font-size:24px;"></i>
+        </div>
         <h3 style="font-size:16px;font-weight:700;margin:0 0 4px;">Wasiliana Nasi</h3>
         <p style="font-size:12px;opacity:0.8;margin:0 0 16px;">Tuko tayari kukusaidia</p>
         <div style="display:flex;gap:10px;justify-content:center;">
-          <a href="tel:+255800000000" style="background:rgba(255,255,255,0.2);color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none;">📞 Piga Simu</a>
-          <a href="https://wa.me/255700000000" style="background:rgba(255,255,255,0.2);color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none;">💬 WhatsApp</a>
+          <a href="tel:+255800000000" style="background:rgba(255,255,255,0.2);color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px;"><i class="icon-phone"></i> Piga Simu</a>
+          <a href="https://wa.me/255700000000" style="background:rgba(255,255,255,0.2);color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px;"><i class="icon-send2"></i> WhatsApp</a>
         </div>
       </div>
 
@@ -77,7 +79,7 @@
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(${i})">
           <span>${f.q}</span>
-          <span class="faq-icon" id="icon-${i}">▼</span>
+          <span class="faq-icon" id="icon-${i}"><i class="icon-down"></i></span>
         </div>
         <div class="faq-a" id="ans-${i}">${f.a}</div>
       </div>
