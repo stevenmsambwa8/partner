@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, viewport-fit=cover">
+  <title>Admin — Wakala Point</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="fonts/fonts.css">
+  <link rel="stylesheet" href="fonts/icons-alipay.css">
+  <link rel="stylesheet" href="styles/bootstrap.css">
+  <link rel="stylesheet" href="styles/styles.css">
+  <link rel="stylesheet" href="styles/wakala.css">
+</head>
+<body class="bg_surface_color">
+  <div class="preload preload-container">
+    <div class="preload-logo"><div class="spinner"></div></div>
+  </div>
+
+  <!-- Admin Header -->
+  <div class="header is-fixed" style="background:#1A1A2E;">
+    <div class="tf-container">
+      <div class="tf-statusbar d-flex justify-content-between align-items-center">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-size:22px;">🛡️</div>
+          <div>
+            <p style="margin:0;font-size:10px;color:rgba(255,255,255,0.6);">Panel ya Msimamizi</p>
+            <h4 style="margin:0;font-size:13px;font-weight:700;color:#fff;">Wakala Point Admin</h4>
+          </div>
+        </div>
+        <a href="#" onclick="doLogout()" style="color:rgba(255,255,255,0.7);font-size:12px;text-decoration:none;">Toka 🚪</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="app-wrap" style="padding-top:70px;">
+    <div class="tf-container" style="padding:16px;">
+
+      <!-- Stats Row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:var(--wakala-shadow);">
+          <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Maombi Yote</p>
+          <h2 id="stat-total" style="font-size:28px;font-weight:800;color:var(--wakala-green);margin:0;"></h2>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:var(--wakala-shadow);">
+          <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Yanasubiri</p>
+          <h2 id="stat-pending" style="font-size:28px;font-weight:800;color:#E03E3E;margin:0;"></h2>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:var(--wakala-shadow);">
+          <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Yanashughulikiwa</p>
+          <h2 id="stat-processing" style="font-size:28px;font-weight:800;color:#0A6EBD;margin:0;"></h2>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:var(--wakala-shadow);">
+          <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Yamekubaliwa</p>
+          <h2 id="stat-approved" style="font-size:28px;font-weight:800;color:var(--wakala-green);margin:0;"></h2>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;">
+        <button class="filter-tab active" onclick="filterAdmin('yote', this)">Yote</button>
+        <button class="filter-tab" onclick="filterAdmin('pending', this)">Inasubiri</button>
+        <button class="filter-tab" onclick="filterAdmin('processing', this)">Inashughulikiwa</button>
+        <button class="filter-tab" onclick="filterAdmin('approved', this)">Imekubaliwa</button>
+        <button class="filter-tab" onclick="filterAdmin('rejected', this)">Imekataliwa</button>
+        <button class="filter-tab" onclick="filterAdmin('lipa-namba', this)">Lipa Namba</button>
+        <button class="filter-tab" onclick="filterAdmin('till-uwakala', this)">Till</button>
+      </div>
+
+      <!-- Search -->
+      <div class="group-input" style="margin-bottom:14px;">
+        <input type="text" id="search-input" placeholder="🔍 Tafuta kwa jina, simu, au ID..." oninput="searchRequests()" style="border-radius:12px;">
+      </div>
+
+      <div id="admin-list"></div>
+    </div>
+  </div>
+
+  <!-- Admin Detail Modal -->
+  <div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;overflow-y:auto;" onclick="closeModal(event)">
+    <div id="modal-box" style="background:#fff;margin:20px 16px;border-radius:20px;overflow:hidden;">
+      <div style="background:var(--wakala-green);padding:20px;color:#fff;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <h3 id="modal-title" style="font-size:16px;font-weight:700;margin:0;"></h3>
+          <button onclick="closeModal(null)" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;">✕</button>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:16px;">
+          <div><p style="font-size:10px;opacity:0.7;margin:0;">ID</p><p id="modal-id" style="font-size:13px;font-weight:700;margin:0;"></p></div>
+          <div><p style="font-size:10px;opacity:0.7;margin:0;">Tarehe</p><p id="modal-date" style="font-size:13px;font-weight:700;margin:0;"></p></div>
+          <div><p style="font-size:10px;opacity:0.7;margin:0;">Hali</p><p id="modal-status" style="font-size:13px;font-weight:700;margin:0;"></p></div>
+        </div>
+      </div>
+
+      <div style="padding:20px;">
+        <div id="modal-details"></div>
+
+        <hr class="divider">
+        <p class="section-title">⚙️ Simamia Ombi</p>
+
+        <div class="group-input">
+          <label>Badilisha Hali</label>
+          <select id="modal-new-status">
+            <option value="pending">Inasubiri</option>
+            <option value="processing">Inashughulikiwa</option>
+            <option value="approved">Imekubaliwa ✅</option>
+            <option value="rejected">Imekataliwa ❌</option>
+          </select>
+        </div>
+        <div class="group-input">
+          <label>Ujumbe kwa Mteja</label>
+          <textarea id="modal-admin-note" rows="3" style="resize:none;font-size:14px;" placeholder="Andika ujumbe utakaoonekana kwa mteja..."></textarea>
+        </div>
+
+        <button class="tf-btn accent large" onclick="saveAdminAction()">💾 Hifadhi Mabadiliko</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .filter-tab { background:#fff; border:1.5px solid var(--wakala-border); border-radius:20px; padding:6px 14px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap; color:var(--wakala-text-muted); transition:all 0.2s; }
+    .filter-tab.active { background:#1A1A2E; border-color:#1A1A2E; color:#fff; }
+    .admin-req-card { background:#fff; border-radius:14px; padding:16px; margin-bottom:10px; box-shadow:var(--wakala-shadow); border:1px solid var(--wakala-border); cursor:pointer; transition:all 0.2s; }
+    .admin-req-card:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(0,0,0,0.12); }
+  </style>
+
+  <script type="module" src="javascript/firebase-init.js"></script>
+  <script src="javascript/jquery.min.js"></script>
+  <script src="javascript/wakala.js"></script>
+  <script src="javascript/main.js"></script>
+  <script>
+    let allRequests = [];
+    let currentFilter = 'yote';
+    let currentSearch = '';
+    let activeReqId = null;
+
+    document.addEventListener('DOMContentLoaded', async function () {
+      if (!requireAdmin()) return;
+      await loadRequests();
+    });
+
+    async function loadRequests() {
+      document.getElementById('admin-list').innerHTML = '<div class="empty-state"><p>Inapakia...</p></div>';
+      allRequests = await getRequests();
+      updateStats();
+      renderAdminList(filtered());
+    }
+
+    function updateStats() {
+      document.getElementById('stat-total').textContent = allRequests.length;
+      document.getElementById('stat-pending').textContent = allRequests.filter(r => r.status === 'pending').length;
+      document.getElementById('stat-processing').textContent = allRequests.filter(r => r.status === 'processing').length;
+      document.getElementById('stat-approved').textContent = allRequests.filter(r => r.status === 'approved').length;
+    }
+
+    function filtered() {
+      return allRequests.filter(r => {
+        const matchFilter = currentFilter === 'yote' ? true :
+          (currentFilter === 'lipa-namba' || currentFilter === 'till-uwakala')
+            ? r.type === currentFilter
+            : r.status === currentFilter;
+        const q = currentSearch.toLowerCase();
+        const matchSearch = !q || r.id.toLowerCase().includes(q) ||
+          (r.userName || '').toLowerCase().includes(q) ||
+          (r.userPhone || '').toLowerCase().includes(q) ||
+          (r.details.jina || '').toLowerCase().includes(q);
+        return matchFilter && matchSearch;
+      });
+    }
+
+    function filterAdmin(f, btn) {
+      document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = f;
+      renderAdminList(filtered());
+    }
+
+    function searchRequests() {
+      currentSearch = document.getElementById('search-input').value;
+      renderAdminList(filtered());
+    }
+
+    function renderAdminList(list) {
+      const el = document.getElementById('admin-list');
+      if (list.length === 0) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><h4>Hakuna Maombi</h4><p>Hakuna yanayolingana na hali uliyochagua</p></div>`;
+        return;
+      }
+      el.innerHTML = list.map(r => `
+        <div class="admin-req-card" onclick="openModal('${r.id}')">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+            <span style="font-size:12px;font-weight:700;color:var(--wakala-green);">${serviceLabel(r.type)}</span>
+            ${statusBadge(r.status)}
+          </div>
+          <p style="font-size:15px;font-weight:700;margin:0 0 4px;">${r.details.jina || r.userName}</p>
+          <p style="font-size:12px;color:var(--wakala-text-muted);margin:0 0 4px;">${r.userPhone || r.details.simu || '—'}</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <p style="font-size:11px;color:var(--wakala-text-muted);margin:0;">${r.id} · ${formatDate(r.tarehe)}</p>
+            ${r.details.mkoa ? `<span class="chip">${r.details.mkoa}</span>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openModal(id) {
+      const req = allRequests.find(r => r.id === id);
+      if (!req) return;
+      activeReqId = id;
+
+      document.getElementById('modal-title').textContent = serviceLabel(req.type);
+      document.getElementById('modal-id').textContent = req.id;
+      document.getElementById('modal-date').textContent = formatDate(req.tarehe);
+      document.getElementById('modal-status').textContent = statusLabel(req.status);
+      document.getElementById('modal-new-status').value = req.status;
+      document.getElementById('modal-admin-note').value = req.adminNote || '';
+
+      // Build details
+      const dMap = {
+        jina: 'Jina Kamili', simu: 'Namba ya Simu',
+        aina_id: 'Aina ya Kitambulisho', namba_id: 'Namba ya Kitambulisho',
+        jina_biashara: 'Jina la Biashara', aina_biashara: 'Aina ya Biashara',
+        namba_ya_biashara: 'Namba ya Usajili', mtandao: 'Mtandao',
+        aina_wakala: 'Aina ya Wakala', mkoa: 'Mkoa', wilaya: 'Wilaya',
+        kata: 'Mtaa/Kata', umbali_wakala: 'Umbali hadi Wakala',
+        mtaji: 'Mtaji', mahali: 'Sehemu ya Biashara',
+        umri: 'Umri', historia_wakala: 'Historia ya Wakala',
+        maelezo: 'Maelezo', eneo_maelezo: 'Maelezo ya Eneo',
+      };
+      let rows = '';
+      for (const [key, label] of Object.entries(dMap)) {
+        if (req.details[key]) {
+          rows += `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--wakala-border);gap:10px;">
+            <span style="font-size:12px;color:var(--wakala-text-muted);flex-shrink:0;">${label}</span>
+            <span style="font-size:12px;font-weight:600;text-align:right;">${req.details[key]}</span>
+          </div>`;
+        }
+      }
+      document.getElementById('modal-details').innerHTML = rows || '<p style="color:var(--wakala-text-muted);font-size:13px;">Hakuna maelezo ya ziada.</p>';
+
+      document.getElementById('modal-overlay').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(e) {
+      if (e && e.target !== document.getElementById('modal-overlay')) return;
+      document.getElementById('modal-overlay').style.display = 'none';
+      document.body.style.overflow = '';
+      activeReqId = null;
+    }
+
+    async function saveAdminAction() {
+      if (!activeReqId) return;
+      const newStatus = document.getElementById('modal-new-status').value;
+      const note = document.getElementById('modal-admin-note').value.trim();
+      const req = allRequests.find(r => r.id === activeReqId);
+      if (!req) return;
+      const saveBtn = document.querySelector('#modal-box button.tf-btn.accent.large');
+      if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Inahifadhi...'; }
+      try {
+        await updateRequest(req._key, { status: newStatus, adminNote: note });
+        await loadRequests();
+        document.getElementById('modal-overlay').style.display = 'none';
+        document.body.style.overflow = '';
+        activeReqId = null;
+        showToast('Mabadiliko yamehifadhiwa! ✅');
+      } catch (e) {
+        showToast('Hitilafu imetokea. Jaribu tena.');
+      } finally {
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Hifadhi Mabadiliko'; }
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.createElement('div');
+      t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A2E;color:#fff;padding:10px 24px;border-radius:30px;font-size:13px;font-weight:600;z-index:9999;';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2500);
+    }
+
+    function doLogout() {
+      if (confirm('Toka kwenye Admin Panel?')) {
+        logout();
+      }
+    }
+  </script>
+</body>
+</html>
