@@ -1,4 +1,7 @@
+/* ===== WAKALA POINT — App Logic (Firebase Realtime Database) ===== */
 
+// localStorage is still used to cache the *current session* only.
+// All real data (users + requests) lives in Firebase Realtime Database.
 const KEYS = {
   USER: 'wp_user',
 };
@@ -179,18 +182,29 @@ async function getRequests() {
     .sort((a, b) => new Date(b.tarehe) - new Date(a.tarehe));
 }
 
-// Get a single request by its display id (e.g. "WPABC123")
+// Get a single request by its display id (e.g. "WPABC123").
+// Checks the current user's own requests first (works for regular users,
+// since RTDB rules only allow a non-admin to read requests matching their
+// own userId). Falls back to the full admin list if not found there.
 async function getRequestById(id) {
-  const all = await getRequests();
-  return all.find((r) => r.id === id) || null;
+  const mine = await getUserRequests();
+  const found = mine.find((r) => r.id === id);
+  if (found) return found;
+  try {
+    const all = await getRequests();
+    return all.find((r) => r.id === id) || null;
+  } catch (e) {
+    // Not an admin and not their own request — no access.
+    return null;
+  }
 }
 
 // Get current user's requests only — returns an array, newest first
 async function getUserRequests() {
-  const user = getUser();
-  if (!user) return [];
   const fb = await wpFirebaseReady();
-  const q = fb.query(fb.ref(fb.db, 'requests'), fb.orderByChild('userId'), fb.equalTo(user.id));
+  const fbUser = fb.auth.currentUser;
+  if (!fbUser) return [];
+  const q = fb.query(fb.ref(fb.db, 'requests'), fb.orderByChild('userId'), fb.equalTo(fbUser.uid));
   const snap = await fb.get(q);
   if (!snap.exists()) return [];
   const obj = snap.val();
@@ -204,12 +218,14 @@ async function submitRequest(type, details) {
   const user = getUser();
   if (!user) { window.location.href = 'login.html'; return; }
   const fb = await wpFirebaseReady();
+  const fbUser = fb.auth.currentUser;
+  if (!fbUser) { window.location.href = 'login.html'; return; }
   const requestsRef = fb.ref(fb.db, 'requests');
   const newRef = fb.push(requestsRef);
   const nowIso = new Date().toISOString();
   const newReq = {
     id: genId(),
-    userId: user.id,
+    userId: fbUser.uid,
     userName: user.jina,
     userPhone: user.simu,
     type,
