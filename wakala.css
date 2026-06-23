@@ -1,7 +1,7 @@
 /* ===== WAKALA POINT — Custom Theme ===== */
 :root {
-  --wakala-primary: #1B3A5C;
-  --wakala-primary-light: #E8EEF5;
+--wakala-primary: #2563EB;
+--wakala-primary-light: #DBEAFE;
   --wakala-primary-dark: #102538;
   --wakala-accent: #E8902E;
   --wakala-accent-light: #FDF1E2;
@@ -18,10 +18,8 @@
 
 body { background: var(--wakala-surface) !important; font-family: 'Inter', 'Nunito', sans-serif; }
 
-/* Header background + preloader (detailed layout rules consolidated below) */
-
 /* Preloader */
-.preload-container { background: linear-gradient(135deg, var(--wakala-primary) 0%, var(--wakala-primary-dark) 100%) !important; }
+.preload-container { background: white; }
 .spinner { border-top-color: var(--wakala-accent) !important; }
 
 /* Bottom Nav */
@@ -162,7 +160,7 @@ body { background: var(--wakala-surface) !important; font-family: 'Inter', 'Nuni
 .section-title { font-size: 16px; font-weight: 800; color: var(--wakala-text); margin: 0 0 14px; }
 
 /* Alert boxes */
-.alert-info-box { background: var(--wakala-primary-light); border-left: 4px solid var(--wakala-primary); border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; color: var(--wakala-primary-dark); }
+.alert-info-box { background: var(--wakala-primary-light); border-left: 4px solid var(--wakala-primary); border-radius: 0px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; color: var(--wakala-primary-dark); }
 
 /* Divider */
 .divider { border: none; border-top: 1px solid var(--wakala-border); margin: 20px 0; }
@@ -256,7 +254,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
   z-index: 1101; transform: translateX(-100%);
   transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
   display: flex; flex-direction: column;
-  border-radius: 0 20px 20px 0;
+  border-radius: 0;!important
   overflow: hidden;
 }
 .sidebar-drawer.open { transform: translateX(0); }
@@ -277,10 +275,10 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 .sidebar-head .sb-info p { color: rgba(255,255,255,0.7); font-size: 12px; margin: 0; }
 .sidebar-head .sb-close {
   position: absolute; right: 14px; top: 14px;
-  width: 32px; height: 32px; background: rgba(255,255,255,0.18);
-  border-radius: 8px; border: none; cursor: pointer;
+  width: 32px; height: 32px;
+  border-radius: 8px; border: none; cursor: pointer; 
   display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 16px;
+  color: none; font-size: 16px;
 }
 
 .sidebar-body { flex: 1; overflow-y: auto; padding: 12px 0; }

@@ -1,7 +1,4 @@
-/* ===== WAKALA POINT — App Logic (Firebase Realtime Database) ===== */
 
-// localStorage is still used to cache the *current session* only.
-// All real data (users + requests) lives in Firebase Realtime Database.
 const KEYS = {
   USER: 'wp_user',
 };
@@ -12,6 +9,19 @@ function wpFirebaseReady() {
   return new Promise((resolve) => {
     window.addEventListener('wp-firebase-ready', () => resolve(window.__wpFirebase), { once: true });
   });
+}
+
+// Wait for Firebase Auth to finish restoring the session on page load
+// (auth.currentUser is null for a brief moment after a refresh, until
+// Firebase re-hydrates it from its own storage). Resolves with the
+// Firebase Auth user, or null if nobody is signed in.
+function wpAuthReady() {
+  return wpFirebaseReady().then((fb) => new Promise((resolve) => {
+    const unsub = fb.onAuthStateChanged(fb.auth, (fbUser) => {
+      unsub();
+      resolve(fbUser);
+    });
+  }));
 }
 
 /* ---------- Helpers ---------- */
@@ -133,6 +143,29 @@ function authErrorMessage(e) {
   return map[code] || 'Hitilafu imetokea. Tafadhali jaribu tena.';
 }
 
+/* ---------- Admin PIN (Realtime Database, scoped to the admin's own uid) ---------- */
+// The PIN itself is never stored — only its SHA-256 hash, under
+// users/{uid}/adminPinHash. RTDB rules only allow an account that is
+// ALREADY isAdmin === true to read or write this field for itself.
+
+async function sha256Hex(text) {
+  const enc = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Returns the current admin's stored PIN hash, or null if never set.
+async function getAdminPinHash(uid) {
+  const fb = await wpFirebaseReady();
+  const snap = await fb.get(fb.ref(fb.db, `users/${uid}/adminPinHash`));
+  return snap.exists() ? snap.val() : null;
+}
+
+async function setAdminPinHash(uid, hash) {
+  const fb = await wpFirebaseReady();
+  await fb.set(fb.ref(fb.db, `users/${uid}/adminPinHash`), hash);
+}
+
 /* ---------- Requests (Realtime Database) ---------- */
 
 // Get all requests (admin use) — returns an array, newest first
@@ -221,16 +254,45 @@ function serviceLabel(type) {
 
 /* ---------- Guards ---------- */
 
-// Auth guard — redirect to login if not logged in
-function requireAuth() {
-  if (!getUser()) { window.location.href = 'login.html'; return false; }
+// Auth guard — redirect to login if not logged in.
+// Waits for Firebase Auth to finish restoring the session before deciding,
+// so a page refresh doesn't briefly look "logged out".
+async function requireAuth() {
+  const fbUser = await wpAuthReady();
+  if (!fbUser) {
+    clearUser();
+    window.location.href = 'login.html';
+    return false;
+  }
   return true;
 }
 
-// Admin guard
-function requireAdmin() {
-  const user = getUser();
-  if (!user || !user.isAdmin) { window.location.href = 'login.html'; return false; }
+// Admin guard — verifies admin status LIVE against Realtime Database,
+// using the signed-in Firebase Auth user's uid. Never trusts the
+// localStorage cache, since that's fully editable by anyone with devtools.
+async function requireAdmin() {
+  const fbUser = await wpAuthReady();
+  if (!fbUser) {
+    clearUser();
+    window.location.href = 'login.html';
+    return false;
+  }
+  const fb = await wpFirebaseReady();
+  let isAdmin = false;
+  try {
+    const snap = await fb.get(fb.ref(fb.db, `users/${fbUser.uid}/isAdmin`));
+    isAdmin = snap.exists() && snap.val() === true;
+  } catch (e) {
+    isAdmin = false;
+  }
+  if (!isAdmin) {
+    window.location.href = 'login.html';
+    return false;
+  }
+  // Refresh the local cache now that we've confirmed admin status server-side,
+  // so the rest of the page (which reads getUser() synchronously) is accurate.
+  const profile = await syncUserProfile(fbUser);
+  saveUser(profile);
   return true;
 }
 

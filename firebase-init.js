@@ -22,6 +22,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
+  onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -61,6 +62,7 @@ window.__wpFirebase = {
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
+  onAuthStateChanged,
 };
 
 // Let other scripts know Firebase is ready (wakala.js waits for this).

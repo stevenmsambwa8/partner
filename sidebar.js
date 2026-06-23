@@ -22,8 +22,8 @@
             <h4 id="sb-name">${name}</h4>
             <p id="sb-phone">${phone}</p>
           </div>
-          <button class="sb-close" id="sb-close">
-            <i class="icon-close1" style="font-size:14px;"></i>
+          <button class="sb-close" id="sb-close"  style="color:transparent;background: none">
+            <i class="icon-close1" style="font-size:14px; color: white; border-left: 10px"></i>
           </button>
         </div>
         <div class="sidebar-body">
