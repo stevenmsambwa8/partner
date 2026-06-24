@@ -10,34 +10,124 @@
   <link rel="stylesheet" href="bootstrap.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="wakala.css">
+  <style>
+    /* ── PIN ── */
+    .pin-dot { width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.5);transition:background .15s,transform .15s; }
+    .pin-dot.filled { background:#fff;transform:scale(1.1); }
+    .pin-dot.error  { background:#FF6B6B;border-color:#FF6B6B; }
+    .pin-key { width:100%;aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#fff;font-size:20px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .12s,transform .08s; }
+    .pin-key:active { background:rgba(255,255,255,0.28);transform:scale(0.93); }
+    .pin-key-ghost  { background:transparent!important;border:none!important;font-size:12px;font-weight:600;color:rgba(255,255,255,0.55); }
+    .pin-shake { animation:pinShake .4s; }
+    @keyframes pinShake { 10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)} }
+
+    /* ── Bottom nav ── */
+    .admin-nav { position:fixed;bottom:0;left:0;right:0;z-index:200;background:#fff;border-top:1px solid #eee;display:flex;height:60px; }
+    .admin-nav-item { flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:none;color:#aaa;font-size:10px;font-weight:600;transition:color .2s; }
+    .admin-nav-item i { font-size:20px; }
+    .admin-nav-item.active { color:var(--wakala-primary); }
+
+    /* ── Stat cards ── */
+    .stat-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px; }
+    .stat-card { background:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 2px 12px rgba(0,0,0,0.07); }
+    .stat-card .label { font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px; }
+    .stat-card .value { font-size:26px;font-weight:800;margin:0;line-height:1; }
+    .stat-card.full { grid-column:span 2; }
+    .stat-card.accent-purple .value { color:#7C3AED; }
+    .stat-card.accent-red    .value { color:#DC2626; }
+    .stat-card.accent-blue   .value { color:#1D5FA8; }
+    .stat-card.accent-green  .value { color:#059669; }
+
+    /* ── Filter pills ── */
+    .pill-row { display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none; }
+    .pill-row::-webkit-scrollbar { display:none; }
+    .pill { background:#f1f1f1;border:none;border-radius:20px;padding:6px 14px;font-size:11px;font-weight:600;color:var(--wakala-text-muted);cursor:pointer;white-space:nowrap;transition:all .18s; }
+    .pill.active { background:var(--wakala-primary);color:#fff; }
+
+    /* ── Search ── */
+    .search-wrap { position:relative;margin-bottom:12px; }
+    .search-wrap i { position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#bbb;font-size:16px; }
+    .search-wrap input { width:100%;padding:11px 14px 11px 38px;border:1.5px solid #eee;border-radius:12px;font-size:13px;outline:none;background:#fafafa; }
+    .search-wrap input:focus { border-color:var(--wakala-primary);background:#fff; }
+
+    /* ── Request cards ── */
+    .req-card { background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:8px;box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1px solid #f0f0f0;cursor:pointer;transition:transform .15s; }
+    .req-card:active { transform:scale(0.985); }
+    .req-card-top { display:flex;justify-content:space-between;align-items:center;margin-bottom:6px; }
+    .req-card-name { font-size:15px;font-weight:700;margin:0 0 2px; }
+    .req-card-meta { font-size:11px;color:var(--wakala-text-muted); }
+
+    /* ── Status badges ── */
+    .badge { display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700; }
+    .badge-pending    { background:#FEF3C7;color:#B45309; }
+    .badge-processing { background:#DBEAFE;color:#1D4ED8; }
+    .badge-approved   { background:#D1FAE5;color:#065F46; }
+    .badge-rejected   { background:#FEE2E2;color:#B91C1C; }
+
+    /* ── Service tag ── */
+    .svc-tag { font-size:10px;font-weight:700;color:var(--wakala-primary);background:rgba(var(--wakala-primary-rgb,30,86,160),0.08);padding:2px 8px;border-radius:6px; }
+
+    /* ── User cards ── */
+    .user-card { background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:8px;box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1px solid #f0f0f0;display:flex;align-items:center;gap:12px; }
+    .user-avatar { width:42px;height:42px;border-radius:13px;background:var(--wakala-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;font-weight:800;color:#fff; }
+    .user-avatar.blocked { background:#DC2626; }
+    .user-info { flex:1;min-width:0; }
+    .user-name { font-size:14px;font-weight:700;margin:0 0 2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap; }
+    .user-sub  { font-size:11px;color:var(--wakala-text-muted);margin:0; }
+    .badge-admin   { background:#EEF2FF;color:#4338CA;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px; }
+    .badge-blocked { background:#FEE2E2;color:#B91C1C;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px; }
+    .block-btn { flex-shrink:0;border:none;border-radius:10px;padding:7px 13px;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s; }
+    .block-btn.zuia   { background:#FEE2E2;color:#DC2626; }
+    .block-btn.fungua { background:#D1FAE5;color:#059669; }
+    .block-btn:active { opacity:.75; }
+
+    /* ── Modal ── */
+    .modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;overflow-y:auto; }
+    .modal-box { background:#fff;margin:20px 14px 100px;border-radius:20px;overflow:hidden; }
+    .modal-header { background:var(--wakala-primary);padding:18px 20px;color:#fff; }
+    .modal-header h3 { font-size:15px;font-weight:700;margin:0 0 10px; }
+    .modal-meta { display:flex;gap:18px; }
+    .modal-meta-item p:first-child { font-size:9px;opacity:.65;margin:0; }
+    .modal-meta-item p:last-child  { font-size:12px;font-weight:700;margin:0; }
+    .modal-body { padding:18px 20px; }
+    .detail-row { display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;gap:12px; }
+    .detail-row:last-child { border-bottom:none; }
+    .detail-label { font-size:12px;color:var(--wakala-text-muted);flex-shrink:0; }
+    .detail-val   { font-size:12px;font-weight:600;text-align:right; }
+    .modal-close-btn { position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px; }
+
+    /* ── Section heading ── */
+    .section-heading { font-size:13px;font-weight:700;color:var(--wakala-text-muted);text-transform:uppercase;letter-spacing:.5px;margin:0 0 10px; }
+
+    /* ── Empty ── */
+    .empty { text-align:center;padding:40px 20px;color:var(--wakala-text-muted); }
+    .empty i { font-size:40px;opacity:.3;display:block;margin-bottom:10px; }
+    .empty h4 { font-size:15px;font-weight:700;margin:0 0 4px;color:var(--wakala-text); }
+    .empty p  { font-size:13px;margin:0; }
+
+    /* ── Toast ── */
+    .wp-toast { position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 22px;border-radius:30px;font-size:13px;font-weight:600;z-index:9999;pointer-events:none; }
+  </style>
 </head>
 <body class="bg_surface_color">
   <div class="preload preload-container">
     <div class="preload-logo"><div class="spinner"></div></div>
   </div>
 
-  <!-- ===== PIN Lock Screen ===== -->
-  <div id="pin-lock-screen" style="position:fixed;inset:0;z-index:5000;background:linear-gradient(135deg, var(--wakala-primary) 0%, var(--wakala-primary-dark) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
-    <div style="width:100%;max-width:340px;text-align:center;">
-
-      <div style="width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;">
-        <i class="icon-secure1" id="pin-header-icon" style="font-size:28px;color:#fff;"></i>
+  <!-- ===== PIN Lock ===== -->
+  <div id="pin-lock-screen" style="position:fixed;inset:0;z-index:5000;background:linear-gradient(135deg,var(--wakala-primary) 0%,var(--wakala-primary-dark) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
+    <div style="width:100%;max-width:300px;text-align:center;">
+      <div style="width:60px;height:60px;border-radius:18px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <i class="icon-secure1" style="font-size:26px;color:#fff;"></i>
       </div>
-      <h3 id="pin-title" style="color:#fff;font-size:18px;font-weight:800;margin:0 0 6px;">Panel ya Msimamizi</h3>
-      <p id="pin-subtitle" style="color:rgba(255,255,255,0.65);font-size:13px;margin:0 0 28px;">Weka PIN ya tarakimu 4 kuingia</p>
-
-      <!-- PIN dots -->
-      <div id="pin-dots" style="display:flex;justify-content:center;gap:14px;margin-bottom:14px;">
-        <span class="pin-dot"></span>
-        <span class="pin-dot"></span>
-        <span class="pin-dot"></span>
-        <span class="pin-dot"></span>
+      <h3 style="color:#fff;font-size:17px;font-weight:800;margin:0 0 4px;">Panel ya Msimamizi</h3>
+      <p style="color:rgba(255,255,255,0.6);font-size:12px;margin:0 0 26px;">Weka PIN ya tarakimu 4</p>
+      <div id="pin-dots" style="display:flex;justify-content:center;gap:14px;margin-bottom:12px;">
+        <span class="pin-dot"></span><span class="pin-dot"></span>
+        <span class="pin-dot"></span><span class="pin-dot"></span>
       </div>
-
-      <p id="pin-error" style="color:#FFD3D3;font-size:12px;font-weight:600;min-height:16px;margin:0 0 18px;"></p>
-
-      <!-- Numeric keypad -->
-      <div id="pin-keypad" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;max-width:260px;margin:0 auto;">
+      <p id="pin-error" style="color:#FFD3D3;font-size:11px;font-weight:600;min-height:16px;margin:0 0 18px;"></p>
+      <div id="pin-keypad" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;max-width:240px;margin:0 auto;">
         <button class="pin-key" data-num="1">1</button>
         <button class="pin-key" data-num="2">2</button>
         <button class="pin-key" data-num="3">3</button>
@@ -51,145 +141,137 @@
         <button class="pin-key" data-num="0">0</button>
         <button class="pin-key pin-key-ghost" id="pin-backspace-btn"><i class="icon-left"></i></button>
       </div>
-
-      <p style="margin-top:24px;">
-        <a href="login.html" style="color:rgba(255,255,255,0.55);font-size:12px;text-decoration:underline;">Rudi kwenye Ingia</a>
-      </p>
+      <p style="margin-top:22px;"><a href="login.html" style="color:rgba(255,255,255,0.45);font-size:11px;">Rudi kwenye Ingia</a></p>
     </div>
   </div>
 
-  <!-- ===== Reset PIN Screen ===== -->
+  <!-- ===== Reset PIN ===== -->
   <div id="pin-reset-screen" style="display:none;position:fixed;inset:0;z-index:5001;background:var(--wakala-surface);flex-direction:column;padding:24px;overflow-y:auto;">
     <div style="width:100%;max-width:340px;margin:40px auto 0;">
       <button id="pin-reset-back" style="background:none;border:none;color:var(--wakala-primary);font-size:13px;font-weight:700;padding:0;margin-bottom:20px;display:flex;align-items:center;gap:6px;"><i class="icon-left"></i> Rudi</button>
-
-      <h3 style="font-size:18px;font-weight:800;color:var(--wakala-text);margin:0 0 6px;">Weka Upya PIN</h3>
-      <p style="font-size:13px;color:var(--wakala-text-muted);margin:0 0 24px;">Thibitisha PIN ya zamani kisha weka PIN mpya ya tarakimu 4.</p>
-
-      <div class="group-input">
-        <label>PIN ya Zamani</label>
-        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="reset-old-pin" placeholder="••••">
-      </div>
-      <div class="group-input">
-        <label>PIN Mpya</label>
-        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="reset-new-pin" placeholder="••••">
-      </div>
-      <div class="group-input">
-        <label>Thibitisha PIN Mpya</label>
-        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="reset-new-pin2" placeholder="••••">
-      </div>
-
-      <p id="reset-error" style="color:var(--wakala-red);font-size:13px;display:none;margin-bottom:12px;"></p>
-      <p id="reset-success" style="color:var(--wakala-success);font-size:13px;display:none;margin-bottom:12px;"></p>
-
+      <h3 style="font-size:17px;font-weight:800;color:var(--wakala-text);margin:0 0 4px;">Weka Upya PIN</h3>
+      <p style="font-size:12px;color:var(--wakala-text-muted);margin:0 0 22px;">Thibitisha PIN ya zamani kisha weka PIN mpya ya tarakimu 4.</p>
+      <div class="group-input"><label>PIN ya Zamani</label><input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="reset-old-pin" placeholder="••••"></div>
+      <div class="group-input"><label>PIN Mpya</label><input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="reset-new-pin" placeholder="••••"></div>
+      <div class="group-input"><label>Thibitisha PIN Mpya</label><input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="reset-new-pin2" placeholder="••••"></div>
+      <p id="reset-error" style="color:var(--wakala-red);font-size:12px;display:none;margin-bottom:10px;"></p>
+      <p id="reset-success" style="color:var(--wakala-success);font-size:12px;display:none;margin-bottom:10px;"></p>
       <button class="tf-btn accent large" id="pin-reset-submit">Hifadhi PIN Mpya</button>
     </div>
   </div>
 
-  <!-- Admin Header -->
+  <!-- ===== Header ===== -->
   <div class="header is-fixed header-admin">
     <div class="tf-container">
       <div class="tf-statusbar header-row d-flex align-items-center">
-        <div class="hdr-flex-text" style="display:flex;align-items:center;gap:10px;">
-          <div style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="icon-secure1" style="font-size:17px;color:#fff;"></i>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,0.14);display:flex;align-items:center;justify-content:center;">
+            <i class="icon-secure1" style="font-size:16px;color:#fff;"></i>
           </div>
-          <div class="hdr-flex-text">
-            <p style="margin:0;font-size:10px;color:rgba(255,255,255,0.6);">Panel ya Msimamizi</p>
-            <h4 style="margin:0;font-size:13px;font-weight:700;color:#fff;">Wakala Point Admin</h4>
+          <div>
+            <p style="margin:0;font-size:9px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:.5px;">Wakala Point</p>
+            <h4 style="margin:0;font-size:13px;font-weight:800;color:#fff;">Admin Panel</h4>
           </div>
         </div>
-        <a href="#" onclick="doLogout()" style="color:rgba(255,255,255,0.7);font-size:12px;text-decoration:none;flex-shrink:0;">Toka</a>
+        <button onclick="doLogout()" style="background:rgba(255,255,255,0.12);border:none;color:#fff;font-size:11px;font-weight:700;padding:6px 14px;border-radius:20px;cursor:pointer;">Toka</button>
       </div>
     </div>
   </div>
 
-  <div id="app-wrap" style="padding-top:70px;">
-    <div class="tf-container" style="padding:16px;">
+  <!-- ===== Main ===== -->
+  <div id="app-wrap" style="padding-top:70px;padding-bottom:70px;">
+    <div style="padding:14px 16px;">
 
-      <!-- Stats Row -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-        <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:var(--wakala-shadow);">
-          <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Maombi Yote</p>
-          <h2 id="stat-total" style="font-size:28px;font-weight:800;color:var(--wakala-primary);margin:0;"></h2>
+      <!-- Stats -->
+      <div class="stat-grid" id="stats-grid">
+        <div class="stat-card">
+          <p class="label">Maombi Yote</p>
+          <p class="value" id="stat-total" style="color:var(--wakala-primary);">—</p>
         </div>
-        <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:var(--wakala-shadow);">
-          <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Yanasubiri</p>
-          <h2 id="stat-pending" style="font-size:28px;font-weight:800;color:var(--wakala-accent);margin:0;"></h2>
+        <div class="stat-card">
+          <p class="label">Yanasubiri</p>
+          <p class="value" id="stat-pending" style="color:#D97706;">—</p>
         </div>
-        <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:var(--wakala-shadow);">
-          <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Yanashughulikiwa</p>
-          <h2 id="stat-processing" style="font-size:28px;font-weight:800;color:#1D5FA8;margin:0;"></h2>
+        <div class="stat-card">
+          <p class="label">Yanashughulikiwa</p>
+          <p class="value accent-blue" id="stat-processing" style="color:#1D5FA8;">—</p>
         </div>
-        <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:var(--wakala-shadow);">
-          <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Yamekubaliwa</p>
-          <h2 id="stat-approved" style="font-size:28px;font-weight:800;color:var(--wakala-primary);margin:0;"></h2>
+        <div class="stat-card">
+          <p class="label">Yamekubaliwa</p>
+          <p class="value" id="stat-approved" style="color:#059669;">—</p>
         </div>
-        <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:var(--wakala-shadow);grid-column:span 2;">
-          <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Watumiaji Wote</p>
-          <h2 id="stat-users" style="font-size:28px;font-weight:800;color:#7C3AED;margin:0;display:inline;"></h2>
-          <span id="stat-blocked" style="font-size:12px;font-weight:700;color:#DC2626;margin-left:10px;"></span>
+        <div class="stat-card full" style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <p class="label">Watumiaji Wote</p>
+            <p class="value" id="stat-users" style="color:#7C3AED;">—</p>
+          </div>
+          <div style="text-align:right;">
+            <p class="label">Waliozuiwa</p>
+            <p class="value" id="stat-blocked" style="color:#DC2626;font-size:22px;">—</p>
+          </div>
         </div>
       </div>
 
-      <!-- Main Section Tabs -->
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <button id="tab-requests-btn" class="section-tab active" onclick="switchSection('requests', this)"><i class="icon-request" style="margin-right:5px;"></i>Maombi</button>
-        <button id="tab-users-btn" class="section-tab" onclick="switchSection('users', this)"><i class="icon-profile" style="margin-right:5px;"></i>Watumiaji</button>
-      </div>
-
-      <!-- REQUESTS SECTION -->
+      <!-- ── SECTION: REQUESTS ── -->
       <div id="section-requests">
-        <!-- Filters -->
-        <div style="display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;">
-          <button class="filter-tab active" onclick="filterAdmin('yote', this)">Yote</button>
-          <button class="filter-tab" onclick="filterAdmin('pending', this)">Inasubiri</button>
-          <button class="filter-tab" onclick="filterAdmin('processing', this)">Inashughulikiwa</button>
-          <button class="filter-tab" onclick="filterAdmin('approved', this)">Imekubaliwa</button>
-          <button class="filter-tab" onclick="filterAdmin('rejected', this)">Imekataliwa</button>
-          <button class="filter-tab" onclick="filterAdmin('lipa-namba', this)">Lipa Namba</button>
-          <button class="filter-tab" onclick="filterAdmin('till-uwakala', this)">Till</button>
+        <p class="section-heading">Maombi</p>
+        <div class="pill-row">
+          <button class="pill active" onclick="filterAdmin('yote',this)">Yote</button>
+          <button class="pill" onclick="filterAdmin('pending',this)">Inasubiri</button>
+          <button class="pill" onclick="filterAdmin('processing',this)">Inashughulikiwa</button>
+          <button class="pill" onclick="filterAdmin('approved',this)">Imekubaliwa</button>
+          <button class="pill" onclick="filterAdmin('rejected',this)">Imekataliwa</button>
+          <button class="pill" onclick="filterAdmin('lipa-namba',this)">Lipa Namba</button>
+          <button class="pill" onclick="filterAdmin('till-uwakala',this)">Till</button>
         </div>
-        <!-- Search -->
-        <div class="group-input" style="margin-bottom:14px;position:relative;">
-          <i class="icon-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--wakala-text-muted);font-size:16px;"></i>
-          <input type="text" id="search-input" placeholder="Tafuta kwa jina, simu, au ID..." oninput="searchRequests()" style="border-radius:12px;padding-left:38px;">
+        <div class="search-wrap">
+          <i class="icon-search"></i>
+          <input type="text" id="search-input" placeholder="Tafuta jina, simu, ID..." oninput="searchRequests()">
         </div>
         <div id="admin-list"></div>
       </div>
 
-      <!-- USERS SECTION -->
+      <!-- ── SECTION: USERS ── -->
       <div id="section-users" style="display:none;">
-        <div class="group-input" style="margin-bottom:14px;position:relative;">
-          <i class="icon-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--wakala-text-muted);font-size:16px;"></i>
-          <input type="text" id="user-search-input" placeholder="Tafuta mtumiaji..." oninput="filterUsers()" style="border-radius:12px;padding-left:38px;">
+        <p class="section-heading">Watumiaji</p>
+        <div class="search-wrap">
+          <i class="icon-search"></i>
+          <input type="text" id="user-search-input" placeholder="Tafuta mtumiaji..." oninput="filterUsers()">
         </div>
-        <div id="users-list"><div class="empty-state"><p>Inapakia...</p></div></div>
+        <div id="users-list"><div class="empty"><i class="icon-profile"></i><p>Inapakia...</p></div></div>
       </div>
+
     </div>
   </div>
 
-  <!-- Admin Detail Modal -->
-  <div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;overflow-y:auto;" onclick="closeModal(event)">
-    <div id="modal-box" style="background:#fff;margin:20px 16px;border-radius:20px;overflow:hidden;">
-      <div style="background:var(--wakala-primary);padding:20px;color:#fff;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <h3 id="modal-title" style="font-size:16px;font-weight:700;margin:0;"></h3>
-          <button onclick="closeModal(null)" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;"><i class="icon-close1" style="font-size:14px;position:static;color:#fff;"></i></button>
+  <!-- ===== Bottom Nav ===== -->
+  <nav class="admin-nav">
+    <button class="admin-nav-item active" id="nav-requests" onclick="switchSection('requests',this)">
+      <i class="icon-request"></i>
+      <span>Maombi</span>
+    </button>
+    <button class="admin-nav-item" id="nav-users" onclick="switchSection('users',this)">
+      <i class="icon-profile"></i>
+      <span>Watumiaji</span>
+    </button>
+  </nav>
+
+  <!-- ===== Request Detail Modal ===== -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-box" id="modal-box">
+      <div class="modal-header" style="position:relative;">
+        <h3 id="modal-title"></h3>
+        <div class="modal-meta">
+          <div class="modal-meta-item"><p>ID</p><p id="modal-id"></p></div>
+          <div class="modal-meta-item"><p>Tarehe</p><p id="modal-date"></p></div>
+          <div class="modal-meta-item"><p>Hali</p><p id="modal-status"></p></div>
         </div>
-        <div style="margin-top:10px;display:flex;gap:16px;">
-          <div><p style="font-size:10px;opacity:0.7;margin:0;">ID</p><p id="modal-id" style="font-size:13px;font-weight:700;margin:0;"></p></div>
-          <div><p style="font-size:10px;opacity:0.7;margin:0;">Tarehe</p><p id="modal-date" style="font-size:13px;font-weight:700;margin:0;"></p></div>
-          <div><p style="font-size:10px;opacity:0.7;margin:0;">Hali</p><p id="modal-status" style="font-size:13px;font-weight:700;margin:0;"></p></div>
-        </div>
+        <button class="modal-close-btn" onclick="closeModal(null)"><i class="icon-close1" style="font-size:13px;position:static;color:#fff;"></i></button>
       </div>
-
-      <div style="padding:20px;">
+      <div class="modal-body">
         <div id="modal-details"></div>
-
-        <hr class="divider">
-        <p class="section-title" style="display:flex;align-items:center;gap:6px;"><i class="icon-setting1"></i> Simamia Ombi</p>
-
+        <hr class="divider" style="margin:14px 0;">
+        <p class="section-heading"><i class="icon-setting1" style="margin-right:5px;"></i>Simamia Ombi</p>
         <div class="group-input">
           <label>Badilisha Hali</label>
           <select id="modal-new-status">
@@ -201,72 +283,21 @@
         </div>
         <div class="group-input">
           <label>Ujumbe kwa Mteja</label>
-          <textarea id="modal-admin-note" rows="3" style="resize:none;font-size:14px;" placeholder="Andika ujumbe utakaoonekana kwa mteja..."></textarea>
+          <textarea id="modal-admin-note" rows="3" style="resize:none;font-size:13px;" placeholder="Andika ujumbe..."></textarea>
         </div>
-
-        <button class="tf-btn accent large" style="display:flex;align-items:center;justify-content:center;gap:8px;" onclick="saveAdminAction()"><i class="icon-checkmark"></i> Hifadhi Mabadiliko</button>
+        <button class="tf-btn accent large" style="display:flex;align-items:center;justify-content:center;gap:8px;" onclick="saveAdminAction()">
+          <i class="icon-checkmark"></i> Hifadhi Mabadiliko
+        </button>
       </div>
     </div>
   </div>
-
-  <style>
-    .filter-tab { background:#fff; border:1.5px solid var(--wakala-border); border-radius:20px; padding:6px 14px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap; color:var(--wakala-text-muted); transition:all 0.2s; }
-    .filter-tab.active { background:var(--wakala-primary); border-color:var(--wakala-primary); color:#fff; }
-    .admin-req-card { background:#fff; border-radius:14px; padding:16px; margin-bottom:10px; box-shadow:var(--wakala-shadow); border:1px solid var(--wakala-border); cursor:pointer; transition:all 0.2s; }
-    .admin-req-card:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(0,0,0,0.12); }
-    .section-tab { background:#fff; border:1.5px solid var(--wakala-border); border-radius:10px; padding:8px 18px; font-size:12px; font-weight:700; cursor:pointer; color:var(--wakala-text-muted); transition:all 0.2s; display:flex;align-items:center; }
-    .section-tab.active { background:var(--wakala-primary); border-color:var(--wakala-primary); color:#fff; }
-    .user-card { background:#fff; border-radius:14px; padding:14px 16px; margin-bottom:10px; box-shadow:var(--wakala-shadow); border:1px solid var(--wakala-border); display:flex;align-items:center;gap:12px; }
-    .user-card-avatar { width:40px;height:40px;border-radius:12px;background:var(--wakala-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-    .user-card-info { flex:1;min-width:0; }
-    .user-blocked-badge { background:#FEE2E2;color:#DC2626;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px; }
-
-    /* PIN lock screen */
-    .pin-dot {
-      width: 16px; height: 16px; border-radius: 50%;
-      background: rgba(255,255,255,0.18);
-      border: 1.5px solid rgba(255,255,255,0.4);
-      transition: background 0.15s, transform 0.15s;
-    }
-    .pin-dot.filled { background: #fff; transform: scale(1.1); }
-    .pin-dot.error { background: #FF6B6B; border-color: #FF6B6B; }
-    .pin-key {
-      width: 100%; aspect-ratio: 1; border-radius: 50%;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.16);
-      color: #fff; font-size: 20px; font-weight: 600;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: background 0.12s, transform 0.08s;
-    }
-    .pin-key:active { background: rgba(255,255,255,0.25); transform: scale(0.94); }
-    .pin-key-ghost { background: transparent; border: none; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); }
-    .pin-key-ghost:active { background: rgba(255,255,255,0.08); }
-    .pin-shake { animation: pinShake 0.4s; }
-    @keyframes pinShake {
-      10%, 90% { transform: translateX(-1px); }
-      20%, 80% { transform: translateX(2px); }
-      30%, 50%, 70% { transform: translateX(-4px); }
-      40%, 60% { transform: translateX(4px); }
-    }
-  </style>
 
   <script type="module" src="firebase-init.js"></script>
   <script src="jquery.min.js"></script>
   <script src="wakala.js"></script>
   <script src="main.js"></script>
   <script>
-    /* =====================================================================
-       ADMIN PIN LOCK
-       The PIN itself is never stored in plain text — only its SHA-256 hash,
-       held in Realtime Database under users/{uid}/adminPinHash (uid = the
-       signed-in admin's own Firebase Auth uid). Default PIN is 1234 and is
-       set the first time this admin account opens this page. Realtime
-       Database rules only allow reading/writing that field for an account
-       that the database itself already confirms is isAdmin === true, so
-       this can't be edited via devtools/localStorage by a regular user.
-       This is a device-session lock layered on top of the Firebase Auth
-       admin check (requireAdmin()), not a replacement for it.
-       ===================================================================== */
+    /* ── PIN Logic ── */
     const PIN_LENGTH = 4;
     const DEFAULT_PIN = '1234';
     let enteredPin = '';
@@ -274,15 +305,11 @@
 
     async function ensurePinInitialized() {
       const existing = await getAdminPinHash(adminUid);
-      if (!existing) {
-        const hash = await sha256Hex(DEFAULT_PIN);
-        await setAdminPinHash(adminUid, hash);
-      }
+      if (!existing) await setAdminPinHash(adminUid, await sha256Hex(DEFAULT_PIN));
     }
 
     function renderPinDots() {
-      const dots = document.querySelectorAll('#pin-dots .pin-dot');
-      dots.forEach((d, i) => {
+      document.querySelectorAll('#pin-dots .pin-dot').forEach((d, i) => {
         d.classList.toggle('filled', i < enteredPin.length);
         d.classList.remove('error');
       });
@@ -296,19 +323,15 @@
     }
 
     async function checkPin() {
-      const storedHash = await getAdminPinHash(adminUid);
-      const enteredHash = await sha256Hex(enteredPin);
-      if (enteredHash === storedHash) {
+      const stored = await getAdminPinHash(adminUid);
+      const entered = await sha256Hex(enteredPin);
+      if (entered === stored) {
         document.getElementById('pin-lock-screen').style.display = 'none';
         sessionStorage.setItem('wp_admin_unlocked', '1');
         await initAdminPanel();
       } else {
         pinError('PIN si sahihi. Jaribu tena.');
-        setTimeout(() => {
-          enteredPin = '';
-          renderPinDots();
-          document.getElementById('pin-error').textContent = '';
-        }, 700);
+        setTimeout(() => { enteredPin = ''; renderPinDots(); document.getElementById('pin-error').textContent = ''; }, 700);
       }
     }
 
@@ -321,87 +344,44 @@
           if (enteredPin.length === PIN_LENGTH) checkPin();
         });
       });
-      document.getElementById('pin-backspace-btn').addEventListener('click', () => {
-        enteredPin = enteredPin.slice(0, -1);
-        renderPinDots();
-      });
-      document.getElementById('pin-forgot-btn').addEventListener('click', () => {
-        document.getElementById('pin-lock-screen').style.display = 'none';
-        openResetScreen();
-      });
+      document.getElementById('pin-backspace-btn').addEventListener('click', () => { enteredPin = enteredPin.slice(0,-1); renderPinDots(); });
+      document.getElementById('pin-forgot-btn').addEventListener('click', () => { document.getElementById('pin-lock-screen').style.display='none'; openResetScreen(); });
     }
 
     function openResetScreen() {
-      document.getElementById('pin-reset-screen').style.display = 'flex';
-      document.getElementById('reset-old-pin').value = '';
-      document.getElementById('reset-new-pin').value = '';
-      document.getElementById('reset-new-pin2').value = '';
-      document.getElementById('reset-error').style.display = 'none';
-      document.getElementById('reset-success').style.display = 'none';
+      document.getElementById('pin-reset-screen').style.display='flex';
+      ['reset-old-pin','reset-new-pin','reset-new-pin2'].forEach(id => document.getElementById(id).value='');
+      document.getElementById('reset-error').style.display='none';
+      document.getElementById('reset-success').style.display='none';
     }
 
     function setupResetScreen() {
       document.getElementById('pin-reset-back').addEventListener('click', () => {
-        document.getElementById('pin-reset-screen').style.display = 'none';
-        enteredPin = '';
-        renderPinDots();
-        document.getElementById('pin-lock-screen').style.display = 'flex';
+        document.getElementById('pin-reset-screen').style.display='none';
+        enteredPin=''; renderPinDots();
+        document.getElementById('pin-lock-screen').style.display='flex';
       });
-
-      // Only allow digits in PIN inputs
-      ['reset-old-pin', 'reset-new-pin', 'reset-new-pin2'].forEach(id => {
-        document.getElementById(id).addEventListener('input', (e) => {
-          e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, PIN_LENGTH);
-        });
+      ['reset-old-pin','reset-new-pin','reset-new-pin2'].forEach(id => {
+        document.getElementById(id).addEventListener('input', e => { e.target.value = e.target.value.replace(/[^0-9]/g,'').slice(0,PIN_LENGTH); });
       });
-
       document.getElementById('pin-reset-submit').addEventListener('click', async () => {
         const oldPin = document.getElementById('reset-old-pin').value;
         const newPin = document.getElementById('reset-new-pin').value;
         const newPin2 = document.getElementById('reset-new-pin2').value;
         const err = document.getElementById('reset-error');
-        const ok = document.getElementById('reset-success');
-        err.style.display = 'none';
-        ok.style.display = 'none';
-
-        if (oldPin.length !== PIN_LENGTH || newPin.length !== PIN_LENGTH || newPin2.length !== PIN_LENGTH) {
-          err.textContent = 'Tafadhali jaza PIN zote, tarakimu 4 kila moja.';
-          err.style.display = 'block';
-          return;
-        }
-        const storedHash = await getAdminPinHash(adminUid);
+        const ok  = document.getElementById('reset-success');
+        err.style.display='none'; ok.style.display='none';
+        if (oldPin.length!==PIN_LENGTH||newPin.length!==PIN_LENGTH||newPin2.length!==PIN_LENGTH) { err.textContent='Jaza PIN zote (tarakimu 4 kila moja).'; err.style.display='block'; return; }
+        const stored  = await getAdminPinHash(adminUid);
         const oldHash = await sha256Hex(oldPin);
-        if (oldHash !== storedHash) {
-          err.textContent = 'PIN ya zamani si sahihi.';
-          err.style.display = 'block';
-          return;
-        }
-        if (newPin !== newPin2) {
-          err.textContent = 'PIN mpya hazifanani.';
-          err.style.display = 'block';
-          return;
-        }
-        if (newPin === oldPin) {
-          err.textContent = 'PIN mpya lazima iwe tofauti na ya zamani.';
-          err.style.display = 'block';
-          return;
-        }
-        const newHash = await sha256Hex(newPin);
+        if (oldHash!==stored) { err.textContent='PIN ya zamani si sahihi.'; err.style.display='block'; return; }
+        if (newPin!==newPin2) { err.textContent='PIN mpya hazifanani.'; err.style.display='block'; return; }
+        if (newPin===oldPin)  { err.textContent='PIN mpya lazima iwe tofauti.'; err.style.display='block'; return; }
         try {
-          await setAdminPinHash(adminUid, newHash);
-        } catch (e) {
-          err.textContent = 'Hitilafu imetokea. Jaribu tena.';
-          err.style.display = 'block';
-          return;
-        }
-        ok.textContent = 'PIN imebadilishwa! Unarudi kwenye skrini ya kuingia...';
-        ok.style.display = 'block';
-        setTimeout(() => {
-          document.getElementById('pin-reset-screen').style.display = 'none';
-          enteredPin = '';
-          renderPinDots();
-          document.getElementById('pin-lock-screen').style.display = 'flex';
-        }, 1500);
+          await setAdminPinHash(adminUid, await sha256Hex(newPin));
+          ok.textContent='PIN imebadilishwa!'; ok.style.display='block';
+          setTimeout(() => { document.getElementById('pin-reset-screen').style.display='none'; enteredPin=''; renderPinDots(); document.getElementById('pin-lock-screen').style.display='flex'; }, 1500);
+        } catch(e) { err.textContent='Hitilafu. Jaribu tena.'; err.style.display='block'; }
       });
     }
 
@@ -413,65 +393,67 @@
       setupPinKeypad();
       setupResetScreen();
       renderPinDots();
-      // If already unlocked earlier this tab session, skip straight to the panel.
-      if (sessionStorage.getItem('wp_admin_unlocked') === '1') {
-        document.getElementById('pin-lock-screen').style.display = 'none';
+      if (sessionStorage.getItem('wp_admin_unlocked')==='1') {
+        document.getElementById('pin-lock-screen').style.display='none';
         await initAdminPanel();
       }
     });
 
+    /* ── Init ── */
     async function initAdminPanel() {
-      await loadRequests();
-      loadUsersStats();
+      await Promise.all([loadRequests(), loadUsers()]);
     }
 
-    async function loadUsersStats() {
-      try {
-        const users = await getUsers();
-        const blocked = users.filter(u => u.blocked === true).length;
-        document.getElementById('stat-users').textContent = users.length;
-        if (blocked > 0) {
-          document.getElementById('stat-blocked').textContent = blocked + ' imezuiwa';
-        }
-      } catch(e) {}
+    /* ── Section Switcher (bottom nav) ── */
+    let currentSection = 'requests';
+    function switchSection(section, btn) {
+      currentSection = section;
+      document.querySelectorAll('.admin-nav-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('section-requests').style.display = section==='requests' ? '' : 'none';
+      document.getElementById('section-users').style.display    = section==='users'    ? '' : 'none';
     }
 
+    /* ── REQUESTS ── */
     let allRequests = [];
     let currentFilter = 'yote';
     let currentSearch = '';
     let activeReqId = null;
 
     async function loadRequests() {
-      document.getElementById('admin-list').innerHTML = '<div class="empty-state"><p>Inapakia...</p></div>';
-      allRequests = await getRequests();
-      updateStats();
-      renderAdminList(filtered());
+      document.getElementById('admin-list').innerHTML = '<div class="empty"><i class="icon-request"></i><p>Inapakia...</p></div>';
+      try {
+        allRequests = await getRequests();
+        updateStats();
+        renderAdminList(filtered());
+      } catch(e) {
+        document.getElementById('admin-list').innerHTML = '<div class="empty"><i class="icon-request"></i><p>Hitilafu ya kupakia maombi.</p></div>';
+      }
     }
 
     function updateStats() {
-      document.getElementById('stat-total').textContent = allRequests.length;
-      document.getElementById('stat-pending').textContent = allRequests.filter(r => r.status === 'pending').length;
-      document.getElementById('stat-processing').textContent = allRequests.filter(r => r.status === 'processing').length;
-      document.getElementById('stat-approved').textContent = allRequests.filter(r => r.status === 'approved').length;
+      document.getElementById('stat-total').textContent      = allRequests.length;
+      document.getElementById('stat-pending').textContent    = allRequests.filter(r=>r.status==='pending').length;
+      document.getElementById('stat-processing').textContent = allRequests.filter(r=>r.status==='processing').length;
+      document.getElementById('stat-approved').textContent   = allRequests.filter(r=>r.status==='approved').length;
     }
 
     function filtered() {
       return allRequests.filter(r => {
-        const matchFilter = currentFilter === 'yote' ? true :
-          (currentFilter === 'lipa-namba' || currentFilter === 'till-uwakala')
-            ? r.type === currentFilter
-            : r.status === currentFilter;
+        const matchFilter = currentFilter==='yote' ? true :
+          (currentFilter==='lipa-namba'||currentFilter==='till-uwakala') ? r.type===currentFilter : r.status===currentFilter;
         const q = currentSearch.toLowerCase();
-        const matchSearch = !q || r.id.toLowerCase().includes(q) ||
-          (r.userName || '').toLowerCase().includes(q) ||
-          (r.userPhone || '').toLowerCase().includes(q) ||
-          (r.details.jina || '').toLowerCase().includes(q);
+        const matchSearch = !q ||
+          r.id.toLowerCase().includes(q) ||
+          (r.userName||'').toLowerCase().includes(q) ||
+          (r.userPhone||'').toLowerCase().includes(q) ||
+          (r.details.jina||'').toLowerCase().includes(q);
         return matchFilter && matchSearch;
       });
     }
 
     function filterAdmin(f, btn) {
-      document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       currentFilter = f;
       renderAdminList(filtered());
@@ -484,97 +466,168 @@
 
     function renderAdminList(list) {
       const el = document.getElementById('admin-list');
-      if (list.length === 0) {
-        el.innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="icon-request" style="font-size:40px;color:var(--wakala-text-muted);opacity:0.5;"></i></div><h4>Hakuna Maombi</h4><p>Hakuna yanayolingana na hali uliyochagua</p></div>`;
+      if (!list.length) {
+        el.innerHTML = '<div class="empty"><i class="icon-request"></i><h4>Hakuna Maombi</h4><p>Hakuna yanayolingana</p></div>';
         return;
       }
       el.innerHTML = list.map(r => `
-        <div class="admin-req-card" onclick="openModal('${r.id}')">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-            <span style="font-size:12px;font-weight:700;color:var(--wakala-primary);">${serviceLabel(r.type)}</span>
-            ${statusBadge(r.status)}
+        <div class="req-card" onclick="openModal('${r.id}')">
+          <div class="req-card-top">
+            <span class="svc-tag">${serviceLabel(r.type)}</span>
+            <span class="badge badge-${r.status}">${statusLabel(r.status)}</span>
           </div>
-          <p style="font-size:15px;font-weight:700;margin:0 0 4px;">${r.details.jina || r.userName}</p>
-          <p style="font-size:12px;color:var(--wakala-text-muted);margin:0 0 4px;">${r.userPhone || r.details.simu || '—'}</p>
+          <p class="req-card-name">${r.details.jina||r.userName||'—'}</p>
           <div style="display:flex;justify-content:space-between;align-items:center;">
-            <p style="font-size:11px;color:var(--wakala-text-muted);margin:0;">${r.id} · ${formatDate(r.tarehe)}</p>
-            ${r.details.mkoa ? `<span class="chip">${r.details.mkoa}</span>` : ''}
+            <p class="req-card-meta">${r.userPhone||r.details.simu||'—'}</p>
+            <p class="req-card-meta">${r.id} · ${formatDate(r.tarehe)}</p>
           </div>
         </div>
       `).join('');
     }
 
     function openModal(id) {
-      const req = allRequests.find(r => r.id === id);
+      const req = allRequests.find(r=>r.id===id);
       if (!req) return;
       activeReqId = id;
-
-      document.getElementById('modal-title').textContent = serviceLabel(req.type);
-      document.getElementById('modal-id').textContent = req.id;
-      document.getElementById('modal-date').textContent = formatDate(req.tarehe);
-      document.getElementById('modal-status').textContent = statusLabel(req.status);
-      document.getElementById('modal-new-status').value = req.status;
-      document.getElementById('modal-admin-note').value = req.adminNote || '';
-
-      // Build details
+      document.getElementById('modal-title').textContent   = serviceLabel(req.type);
+      document.getElementById('modal-id').textContent      = req.id;
+      document.getElementById('modal-date').textContent    = formatDate(req.tarehe);
+      document.getElementById('modal-status').textContent  = statusLabel(req.status);
+      document.getElementById('modal-new-status').value    = req.status;
+      document.getElementById('modal-admin-note').value    = req.adminNote||'';
       const dMap = {
-        jina: 'Jina Kamili', simu: 'Namba ya Simu',
-        aina_id: 'Aina ya Kitambulisho', namba_id: 'Namba ya Kitambulisho',
-        jina_biashara: 'Jina la Biashara', aina_biashara: 'Aina ya Biashara',
-        namba_ya_biashara: 'Namba ya Usajili', mtandao: 'Mtandao',
-        aina_wakala: 'Aina ya Wakala', mkoa: 'Mkoa', wilaya: 'Wilaya',
-        kata: 'Mtaa/Kata', umbali_wakala: 'Umbali hadi Wakala',
-        mtaji: 'Mtaji', mahali: 'Sehemu ya Biashara',
-        umri: 'Umri', historia_wakala: 'Historia ya Wakala',
-        maelezo: 'Maelezo', eneo_maelezo: 'Maelezo ya Eneo',
+        jina:'Jina Kamili',simu:'Namba ya Simu',aina_id:'Aina ya Kitambulisho',
+        namba_id:'Namba ya Kitambulisho',jina_biashara:'Jina la Biashara',
+        aina_biashara:'Aina ya Biashara',namba_ya_biashara:'Namba ya Usajili',
+        mtandao:'Mtandao',aina_wakala:'Aina ya Wakala',mkoa:'Mkoa',wilaya:'Wilaya',
+        kata:'Mtaa/Kata',umbali_wakala:'Umbali hadi Wakala',mtaji:'Mtaji',
+        mahali:'Sehemu ya Biashara',umri:'Umri',historia_wakala:'Historia ya Wakala',
+        maelezo:'Maelezo',eneo_maelezo:'Maelezo ya Eneo',
       };
       let rows = '';
-      for (const [key, label] of Object.entries(dMap)) {
-        if (req.details[key]) {
-          rows += `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--wakala-border);gap:10px;">
-            <span style="font-size:12px;color:var(--wakala-text-muted);flex-shrink:0;">${label}</span>
-            <span style="font-size:12px;font-weight:600;text-align:right;">${req.details[key]}</span>
-          </div>`;
-        }
+      for (const [key,label] of Object.entries(dMap)) {
+        if (req.details[key]) rows += `<div class="detail-row"><span class="detail-label">${label}</span><span class="detail-val">${req.details[key]}</span></div>`;
       }
-      document.getElementById('modal-details').innerHTML = rows || '<p style="color:var(--wakala-text-muted);font-size:13px;">Hakuna maelezo ya ziada.</p>';
-
-      document.getElementById('modal-overlay').style.display = 'block';
-      document.body.style.overflow = 'hidden';
+      document.getElementById('modal-details').innerHTML = rows||'<p style="color:var(--wakala-text-muted);font-size:12px;">Hakuna maelezo ya ziada.</p>';
+      document.getElementById('modal-overlay').style.display='block';
+      document.body.style.overflow='hidden';
     }
 
     function closeModal(e) {
-      if (e && e.target !== document.getElementById('modal-overlay')) return;
-      document.getElementById('modal-overlay').style.display = 'none';
-      document.body.style.overflow = '';
-      activeReqId = null;
+      if (e && e.target!==document.getElementById('modal-overlay')) return;
+      document.getElementById('modal-overlay').style.display='none';
+      document.body.style.overflow='';
+      activeReqId=null;
     }
 
     async function saveAdminAction() {
       if (!activeReqId) return;
       const newStatus = document.getElementById('modal-new-status').value;
       const note = document.getElementById('modal-admin-note').value.trim();
-      const req = allRequests.find(r => r.id === activeReqId);
+      const req = allRequests.find(r=>r.id===activeReqId);
       if (!req) return;
-      const saveBtn = document.querySelector('#modal-box button.tf-btn.accent.large');
-      if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Inahifadhi...'; }
+      const btn = document.querySelector('#modal-box button.tf-btn');
+      if (btn) { btn.disabled=true; btn.textContent='Inahifadhi...'; }
       try {
         await updateRequest(req._key, { status: newStatus, adminNote: note });
-        await loadRequests();
-        document.getElementById('modal-overlay').style.display = 'none';
-        document.body.style.overflow = '';
-        activeReqId = null;
+        // update local cache immediately
+        req.status = newStatus;
+        req.adminNote = note;
+        updateStats();
+        document.getElementById('modal-overlay').style.display='none';
+        document.body.style.overflow='';
+        activeReqId=null;
         showToast('Mabadiliko yamehifadhiwa!');
-      } catch (e) {
-        showToast('Hitilafu imetokea. Jaribu tena.');
+        renderAdminList(filtered());
+      } catch(e) {
+        showToast('Hitilafu: ' + (e.message||'Jaribu tena.'));
       } finally {
-        if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<i class="icon-checkmark"></i> Hifadhi Mabadiliko'; }
+        if (btn) { btn.disabled=false; btn.innerHTML='<i class="icon-checkmark"></i> Hifadhi Mabadiliko'; }
       }
     }
 
+    /* ── USERS ── */
+    let allUsers = [];
+
+    async function loadUsers() {
+      document.getElementById('users-list').innerHTML = '<div class="empty"><i class="icon-profile"></i><p>Inapakia...</p></div>';
+      try {
+        allUsers = await getUsers();
+        updateUserStats();
+        renderUsers(allUsers);
+      } catch(e) {
+        document.getElementById('users-list').innerHTML = '<div class="empty"><i class="icon-profile"></i><p>Hitilafu ya kupakia watumiaji.</p></div>';
+        console.error('loadUsers error:', e);
+      }
+    }
+
+    function updateUserStats() {
+      document.getElementById('stat-users').textContent   = allUsers.length;
+      document.getElementById('stat-blocked').textContent = allUsers.filter(u=>u.blocked===true).length;
+    }
+
+    function filterUsers() {
+      const q = document.getElementById('user-search-input').value.toLowerCase();
+      renderUsers(!q ? allUsers : allUsers.filter(u =>
+        (u.jina||'').toLowerCase().includes(q) ||
+        (u.email||'').toLowerCase().includes(q) ||
+        (u.simu||'').toLowerCase().includes(q)
+      ));
+    }
+
+    function renderUsers(list) {
+      const el = document.getElementById('users-list');
+      if (!list.length) {
+        el.innerHTML = '<div class="empty"><i class="icon-profile"></i><h4>Hakuna Watumiaji</h4><p>Hakuna wanaolingana</p></div>';
+        return;
+      }
+      el.innerHTML = list.map(u => {
+        const initials  = (u.jina||'U').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+        const isBlocked = u.blocked===true;
+        const isAdminU  = u.isAdmin===true;
+        return `
+        <div class="user-card">
+          <div class="user-avatar${isBlocked?' blocked':''}">
+            ${isBlocked ? '<i class="icon-secure1" style="font-size:18px;color:#fff;"></i>' : initials}
+          </div>
+          <div class="user-info">
+            <p class="user-name">
+              ${u.jina||'Bila Jina'}
+              ${isAdminU  ? '<span class="badge-admin">Admin</span>'   : ''}
+              ${isBlocked ? '<span class="badge-blocked">Imezuiwa</span>' : ''}
+            </p>
+            <p class="user-sub">${u.email||'—'}</p>
+            <p class="user-sub">${[u.simu,u.mkoa].filter(Boolean).join(' · ')||'—'}</p>
+          </div>
+          ${!isAdminU ? `
+          <button class="block-btn ${isBlocked?'fungua':'zuia'}" onclick="toggleBlock('${u.uid}',${isBlocked})">
+            ${isBlocked ? '<i class="icon-checkmark" style="margin-right:3px;font-size:12px;"></i>Fungua' : '<i class="icon-secure1" style="margin-right:3px;font-size:12px;"></i>Zuia'}
+          </button>` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    async function toggleBlock(uid, currentlyBlocked) {
+      const u = allUsers.find(u=>u.uid===uid);
+      if (!u) return;
+      try {
+        await setUserBlocked(uid, !currentlyBlocked);
+        u.blocked = !currentlyBlocked;
+        updateUserStats();
+        filterUsers();
+        showToast(currentlyBlocked ? 'Akaunti imefunguliwa!' : 'Akaunti imezuiwa!');
+      } catch(e) {
+        showToast('Hitilafu: ' + (e.message||'Jaribu tena.'));
+        console.error('toggleBlock error:', e);
+      }
+    }
+
+    /* ── Utilities ── */
     function showToast(msg) {
+      const old = document.querySelector('.wp-toast');
+      if (old) old.remove();
       const t = document.createElement('div');
-      t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--wakala-primary-dark);color:#fff;padding:10px 24px;border-radius:30px;font-size:13px;font-weight:600;z-index:9999;';
+      t.className = 'wp-toast';
       t.textContent = msg;
       document.body.appendChild(t);
       setTimeout(() => t.remove(), 2500);
@@ -586,84 +639,6 @@
         logout();
       }
     }
-    /* ===== Section Switcher ===== */
-    function switchSection(section, btn) {
-      document.querySelectorAll('.section-tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('section-requests').style.display = section === 'requests' ? '' : 'none';
-      document.getElementById('section-users').style.display = section === 'users' ? '' : 'none';
-      if (section === 'users' && allUsers.length === 0) loadUsers();
-    }
-
-    /* ===== Users Management ===== */
-    let allUsers = [];
-
-    async function loadUsers() {
-      document.getElementById('users-list').innerHTML = '<div class="empty-state"><p>Inapakia...</p></div>';
-      try {
-        allUsers = await getUsers();
-        renderUsers(allUsers);
-      } catch (e) {
-        document.getElementById('users-list').innerHTML = '<div class="empty-state"><p>Hitilafu ya kupakia watumiaji.</p></div>';
-      }
-    }
-
-    function filterUsers() {
-      const q = document.getElementById('user-search-input').value.toLowerCase();
-      if (!q) { renderUsers(allUsers); return; }
-      renderUsers(allUsers.filter(u =>
-        (u.jina || '').toLowerCase().includes(q) ||
-        (u.email || '').toLowerCase().includes(q) ||
-        (u.simu || '').toLowerCase().includes(q)
-      ));
-    }
-
-    function renderUsers(list) {
-      const el = document.getElementById('users-list');
-      if (!list.length) {
-        el.innerHTML = '<div class="empty-state"><h4>Hakuna Watumiaji</h4><p>Hakuna wanaolingana na utafutaji</p></div>';
-        return;
-      }
-      el.innerHTML = list.map(u => {
-        const initials = (u.jina || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
-        const isBlocked = u.blocked === true;
-        const isAdminUser = u.isAdmin === true;
-        return `
-        <div class="user-card">
-          <div class="user-card-avatar">
-            <span style="font-size:15px;font-weight:800;color:#fff;">${initials}</span>
-          </div>
-          <div class="user-card-info">
-            <p style="font-size:14px;font-weight:700;margin:0 0 2px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
-              ${u.jina || 'Bila Jina'}
-              ${isAdminUser ? '<span style="background:#EEF2FF;color:#4F46E5;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;">Admin</span>' : ''}
-              ${isBlocked ? '<span class="user-blocked-badge">Imezuiwa</span>' : ''}
-            </p>
-            <p style="font-size:11px;color:var(--wakala-text-muted);margin:0;">${u.email || '—'}</p>
-            <p style="font-size:11px;color:var(--wakala-text-muted);margin:0;">${u.simu || ''} ${u.mkoa ? '· ' + u.mkoa : ''}</p>
-          </div>
-          ${!isAdminUser ? `
-          <button onclick="toggleBlock('${u.uid}', ${isBlocked})"
-            style="flex-shrink:0;border:none;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:700;cursor:pointer;background:${isBlocked ? '#D1FAE5' : '#FEE2E2'};color:${isBlocked ? '#065F46' : '#DC2626'};">
-            ${isBlocked ? 'Fungua' : 'Zuia'}
-          </button>` : ''}
-        </div>`;
-      }).join('');
-    }
-
-    async function toggleBlock(uid, currentlyBlocked) {
-      try {
-        await setUserBlocked(uid, !currentlyBlocked);
-        // Update local list
-        const u = allUsers.find(u => u.uid === uid);
-        if (u) u.blocked = !currentlyBlocked;
-        filterUsers();
-        showToast(currentlyBlocked ? 'Akaunti imefunguliwa!' : 'Akaunti imezuiwa!');
-      } catch (e) {
-        showToast('Hitilafu imetokea. Jaribu tena.');
-      }
-    }
-
   </script>
 </body>
 </html>
