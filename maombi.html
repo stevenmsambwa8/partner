@@ -74,7 +74,7 @@
     let allMyReqs = [];
 
     document.addEventListener('DOMContentLoaded', async function () {
-      if (!requireAuth()) return;
+      if (!(await requireAuth())) return;
       document.getElementById('list-container').innerHTML = '<div class="empty-state"><p>Inapakia...</p></div>';
       allMyReqs = await getUserRequests();
       renderList(allMyReqs);
