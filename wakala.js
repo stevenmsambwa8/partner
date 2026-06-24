@@ -199,9 +199,9 @@ async function getRequestById(id) {
   }
 }
 
-// Get current user's requests only — returns an array, newest first.
-// Throws on a genuine Firebase error (e.g. PERMISSION_DENIED) so callers
-// can show/log the real reason instead of silently looking empty.
+// Get current user's requests — reads from userRequests/ for the push-key
+// index, then fetches the live record from requests/ to get the latest
+// admin-updated status/note (admin only writes to requests/, not userRequests/).
 async function getUserRequests() {
   const fb = await wpFirebaseReady();
   const fbUser = fb.auth.currentUser;
@@ -209,8 +209,19 @@ async function getUserRequests() {
   const snap = await fb.get(fb.ref(fb.db, `userRequests/${fbUser.uid}`));
   if (!snap.exists()) return [];
   const obj = snap.val();
-  return Object.keys(obj)
-    .map((key) => ({ ...obj[key], _key: key }))
+  const keys = Object.keys(obj);
+  // Fetch live records from requests/ in parallel to get latest status
+  const results = await Promise.all(
+    keys.map(async (key) => {
+      try {
+        const liveSnap = await fb.get(fb.ref(fb.db, `requests/${key}`));
+        if (liveSnap.exists()) return { ...liveSnap.val(), _key: key };
+      } catch (e) { /* fall back to cached copy */ }
+      return { ...obj[key], _key: key };
+    })
+  );
+  return results
+    .filter(Boolean)
     .sort((a, b) => new Date(b.tarehe) - new Date(a.tarehe));
 }
 
@@ -243,22 +254,17 @@ async function submitRequest(type, details) {
 }
 
 // Admin: update a request's status + note. Needs the Firebase push key (_key) of the request.
+// Admin: update a request's status + note.
+// Only writes to requests/ — per DB rules, userRequests.$uid .write only
+// allows the owner (auth.uid === $uid), not admin. Authoritative status
+// lives in requests/ which admin CAN write per the rules.
 async function updateRequest(_key, { status, adminNote }) {
   const fb = await wpFirebaseReady();
-  const snap = await fb.get(fb.ref(fb.db, `requests/${_key}`));
-  if (!snap.exists()) return;
-  const userId = snap.val().userId;
   const updatedAt = new Date().toISOString();
-  const patch = { status, adminNote, updatedAt };
   await fb.update(fb.ref(fb.db), {
     [`requests/${_key}/status`]: status,
     [`requests/${_key}/adminNote`]: adminNote,
     [`requests/${_key}/updatedAt`]: updatedAt,
-    ...(userId ? {
-      [`userRequests/${userId}/${_key}/status`]: status,
-      [`userRequests/${userId}/${_key}/adminNote`]: adminNote,
-      [`userRequests/${userId}/${_key}/updatedAt`]: updatedAt,
-    } : {}),
   });
 }
 
@@ -283,7 +289,7 @@ function serviceLabel(type) {
 
 /* ---------- Guards ---------- */
 
-// Auth guard — redirect to login if not logged in.
+// Auth guard — redirect to login if not logged in, or show blocked screen if blocked.
 // Waits for Firebase Auth to finish restoring the session before deciding,
 // so a page refresh doesn't briefly look "logged out".
 async function requireAuth() {
@@ -291,6 +297,22 @@ async function requireAuth() {
   if (!fbUser) {
     clearUser();
     window.location.href = 'login.html';
+    return false;
+  }
+  // Check if account is blocked by admin
+  const fb = await wpFirebaseReady();
+  const blockedSnap = await fb.get(fb.ref(fb.db, `users/${fbUser.uid}/blocked`));
+  if (blockedSnap.exists() && blockedSnap.val() === true) {
+    // Show block screen instead of redirecting to keep context
+    document.body.innerHTML = `
+      <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;background:var(--wakala-surface,#f5f5f5);text-align:center;">
+        <div style="width:72px;height:72px;border-radius:20px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+          <i class="icon-secure1" style="font-size:32px;color:#DC2626;"></i>
+        </div>
+        <h2 style="font-size:20px;font-weight:800;color:#111;margin:0 0 10px;">Akaunti Imezuiwa</h2>
+        <p style="font-size:14px;color:#666;margin:0 0 28px;max-width:300px;">Akaunti yako imezuiwa na msimamizi. Tafadhali wasiliana na msaada kwa maelezo zaidi.</p>
+        <button onclick="logout()" style="background:#DC2626;color:#fff;border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;">Toka</button>
+      </div>`;
     return false;
   }
   return true;
@@ -343,3 +365,31 @@ document.addEventListener('DOMContentLoaded', function () {
     if (pre) pre.style.display = 'none';
   }, 800);
 });
+
+/* ---------- User Management (Admin only) ---------- */
+
+// Get all registered users — admin only
+async function getUsers() {
+  const fb = await wpFirebaseReady();
+  const snap = await fb.get(fb.ref(fb.db, 'users'));
+  if (!snap.exists()) return [];
+  const obj = snap.val();
+  return Object.keys(obj)
+    .map((uid) => ({ uid, ...obj[uid] }))
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+}
+
+// Admin: block or unblock a user by uid
+async function setUserBlocked(uid, blocked) {
+  const fb = await wpFirebaseReady();
+  await fb.update(fb.ref(fb.db, `users/${uid}`), { blocked: blocked ? true : false });
+}
+
+// Check if current user is blocked — called on every protected page load
+async function checkBlocked() {
+  const fbUser = await wpAuthReady();
+  if (!fbUser) return false;
+  const fb = await wpFirebaseReady();
+  const snap = await fb.get(fb.ref(fb.db, `users/${fbUser.uid}/blocked`));
+  return snap.exists() && snap.val() === true;
+}
