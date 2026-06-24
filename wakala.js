@@ -199,13 +199,14 @@ async function getRequestById(id) {
   }
 }
 
-// Get current user's requests only — returns an array, newest first
+// Get current user's requests only — returns an array, newest first.
+// Throws on a genuine Firebase error (e.g. PERMISSION_DENIED) so callers
+// can show/log the real reason instead of silently looking empty.
 async function getUserRequests() {
   const fb = await wpFirebaseReady();
   const fbUser = fb.auth.currentUser;
   if (!fbUser) return [];
-  const q = fb.query(fb.ref(fb.db, 'requests'), fb.orderByChild('userId'), fb.equalTo(fbUser.uid));
-  const snap = await fb.get(q);
+  const snap = await fb.get(fb.ref(fb.db, `userRequests/${fbUser.uid}`));
   if (!snap.exists()) return [];
   const obj = snap.val();
   return Object.keys(obj)
@@ -220,8 +221,7 @@ async function submitRequest(type, details) {
   const fb = await wpFirebaseReady();
   const fbUser = fb.auth.currentUser;
   if (!fbUser) { window.location.href = 'login.html'; return; }
-  const requestsRef = fb.ref(fb.db, 'requests');
-  const newRef = fb.push(requestsRef);
+  const newRef = fb.push(fb.ref(fb.db, 'requests'));
   const nowIso = new Date().toISOString();
   const newReq = {
     id: genId(),
@@ -235,17 +235,30 @@ async function submitRequest(type, details) {
     updatedAt: nowIso,
     adminNote: '',
   };
-  await fb.set(newRef, newReq);
+  await fb.update(fb.ref(fb.db), {
+    [`requests/${newRef.key}`]: newReq,
+    [`userRequests/${fbUser.uid}/${newRef.key}`]: newReq,
+  });
   return { ...newReq, _key: newRef.key };
 }
 
 // Admin: update a request's status + note. Needs the Firebase push key (_key) of the request.
 async function updateRequest(_key, { status, adminNote }) {
   const fb = await wpFirebaseReady();
-  await fb.update(fb.ref(fb.db, `requests/${_key}`), {
-    status,
-    adminNote,
-    updatedAt: new Date().toISOString(),
+  const snap = await fb.get(fb.ref(fb.db, `requests/${_key}`));
+  if (!snap.exists()) return;
+  const userId = snap.val().userId;
+  const updatedAt = new Date().toISOString();
+  const patch = { status, adminNote, updatedAt };
+  await fb.update(fb.ref(fb.db), {
+    [`requests/${_key}/status`]: status,
+    [`requests/${_key}/adminNote`]: adminNote,
+    [`requests/${_key}/updatedAt`]: updatedAt,
+    ...(userId ? {
+      [`userRequests/${userId}/${_key}/status`]: status,
+      [`userRequests/${userId}/${_key}/adminNote`]: adminNote,
+      [`userRequests/${userId}/${_key}/updatedAt`]: updatedAt,
+    } : {}),
   });
 }
 
