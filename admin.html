@@ -125,26 +125,47 @@
           <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Yamekubaliwa</p>
           <h2 id="stat-approved" style="font-size:28px;font-weight:800;color:var(--wakala-primary);margin:0;"></h2>
         </div>
+        <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:var(--wakala-shadow);grid-column:span 2;">
+          <p style="font-size:11px;color:var(--wakala-text-muted);margin:0 0 4px;">Watumiaji Wote</p>
+          <h2 id="stat-users" style="font-size:28px;font-weight:800;color:#7C3AED;margin:0;display:inline;"></h2>
+          <span id="stat-blocked" style="font-size:12px;font-weight:700;color:#DC2626;margin-left:10px;"></span>
+        </div>
       </div>
 
-      <!-- Filters -->
-      <div style="display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;">
-        <button class="filter-tab active" onclick="filterAdmin('yote', this)">Yote</button>
-        <button class="filter-tab" onclick="filterAdmin('pending', this)">Inasubiri</button>
-        <button class="filter-tab" onclick="filterAdmin('processing', this)">Inashughulikiwa</button>
-        <button class="filter-tab" onclick="filterAdmin('approved', this)">Imekubaliwa</button>
-        <button class="filter-tab" onclick="filterAdmin('rejected', this)">Imekataliwa</button>
-        <button class="filter-tab" onclick="filterAdmin('lipa-namba', this)">Lipa Namba</button>
-        <button class="filter-tab" onclick="filterAdmin('till-uwakala', this)">Till</button>
+      <!-- Main Section Tabs -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button id="tab-requests-btn" class="section-tab active" onclick="switchSection('requests', this)"><i class="icon-request" style="margin-right:5px;"></i>Maombi</button>
+        <button id="tab-users-btn" class="section-tab" onclick="switchSection('users', this)"><i class="icon-profile" style="margin-right:5px;"></i>Watumiaji</button>
       </div>
 
-      <!-- Search -->
-      <div class="group-input" style="margin-bottom:14px;position:relative;">
-        <i class="icon-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--wakala-text-muted);font-size:16px;"></i>
-        <input type="text" id="search-input" placeholder="Tafuta kwa jina, simu, au ID..." oninput="searchRequests()" style="border-radius:12px;padding-left:38px;">
+      <!-- REQUESTS SECTION -->
+      <div id="section-requests">
+        <!-- Filters -->
+        <div style="display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;">
+          <button class="filter-tab active" onclick="filterAdmin('yote', this)">Yote</button>
+          <button class="filter-tab" onclick="filterAdmin('pending', this)">Inasubiri</button>
+          <button class="filter-tab" onclick="filterAdmin('processing', this)">Inashughulikiwa</button>
+          <button class="filter-tab" onclick="filterAdmin('approved', this)">Imekubaliwa</button>
+          <button class="filter-tab" onclick="filterAdmin('rejected', this)">Imekataliwa</button>
+          <button class="filter-tab" onclick="filterAdmin('lipa-namba', this)">Lipa Namba</button>
+          <button class="filter-tab" onclick="filterAdmin('till-uwakala', this)">Till</button>
+        </div>
+        <!-- Search -->
+        <div class="group-input" style="margin-bottom:14px;position:relative;">
+          <i class="icon-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--wakala-text-muted);font-size:16px;"></i>
+          <input type="text" id="search-input" placeholder="Tafuta kwa jina, simu, au ID..." oninput="searchRequests()" style="border-radius:12px;padding-left:38px;">
+        </div>
+        <div id="admin-list"></div>
       </div>
 
-      <div id="admin-list"></div>
+      <!-- USERS SECTION -->
+      <div id="section-users" style="display:none;">
+        <div class="group-input" style="margin-bottom:14px;position:relative;">
+          <i class="icon-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--wakala-text-muted);font-size:16px;"></i>
+          <input type="text" id="user-search-input" placeholder="Tafuta mtumiaji..." oninput="filterUsers()" style="border-radius:12px;padding-left:38px;">
+        </div>
+        <div id="users-list"><div class="empty-state"><p>Inapakia...</p></div></div>
+      </div>
     </div>
   </div>
 
@@ -193,6 +214,12 @@
     .filter-tab.active { background:var(--wakala-primary); border-color:var(--wakala-primary); color:#fff; }
     .admin-req-card { background:#fff; border-radius:14px; padding:16px; margin-bottom:10px; box-shadow:var(--wakala-shadow); border:1px solid var(--wakala-border); cursor:pointer; transition:all 0.2s; }
     .admin-req-card:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(0,0,0,0.12); }
+    .section-tab { background:#fff; border:1.5px solid var(--wakala-border); border-radius:10px; padding:8px 18px; font-size:12px; font-weight:700; cursor:pointer; color:var(--wakala-text-muted); transition:all 0.2s; display:flex;align-items:center; }
+    .section-tab.active { background:var(--wakala-primary); border-color:var(--wakala-primary); color:#fff; }
+    .user-card { background:#fff; border-radius:14px; padding:14px 16px; margin-bottom:10px; box-shadow:var(--wakala-shadow); border:1px solid var(--wakala-border); display:flex;align-items:center;gap:12px; }
+    .user-card-avatar { width:40px;height:40px;border-radius:12px;background:var(--wakala-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .user-card-info { flex:1;min-width:0; }
+    .user-blocked-badge { background:#FEE2E2;color:#DC2626;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px; }
 
     /* PIN lock screen */
     .pin-dot {
@@ -395,6 +422,18 @@
 
     async function initAdminPanel() {
       await loadRequests();
+      loadUsersStats();
+    }
+
+    async function loadUsersStats() {
+      try {
+        const users = await getUsers();
+        const blocked = users.filter(u => u.blocked === true).length;
+        document.getElementById('stat-users').textContent = users.length;
+        if (blocked > 0) {
+          document.getElementById('stat-blocked').textContent = blocked + ' imezuiwa';
+        }
+      } catch(e) {}
     }
 
     let allRequests = [];
@@ -547,6 +586,84 @@
         logout();
       }
     }
+    /* ===== Section Switcher ===== */
+    function switchSection(section, btn) {
+      document.querySelectorAll('.section-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('section-requests').style.display = section === 'requests' ? '' : 'none';
+      document.getElementById('section-users').style.display = section === 'users' ? '' : 'none';
+      if (section === 'users' && allUsers.length === 0) loadUsers();
+    }
+
+    /* ===== Users Management ===== */
+    let allUsers = [];
+
+    async function loadUsers() {
+      document.getElementById('users-list').innerHTML = '<div class="empty-state"><p>Inapakia...</p></div>';
+      try {
+        allUsers = await getUsers();
+        renderUsers(allUsers);
+      } catch (e) {
+        document.getElementById('users-list').innerHTML = '<div class="empty-state"><p>Hitilafu ya kupakia watumiaji.</p></div>';
+      }
+    }
+
+    function filterUsers() {
+      const q = document.getElementById('user-search-input').value.toLowerCase();
+      if (!q) { renderUsers(allUsers); return; }
+      renderUsers(allUsers.filter(u =>
+        (u.jina || '').toLowerCase().includes(q) ||
+        (u.email || '').toLowerCase().includes(q) ||
+        (u.simu || '').toLowerCase().includes(q)
+      ));
+    }
+
+    function renderUsers(list) {
+      const el = document.getElementById('users-list');
+      if (!list.length) {
+        el.innerHTML = '<div class="empty-state"><h4>Hakuna Watumiaji</h4><p>Hakuna wanaolingana na utafutaji</p></div>';
+        return;
+      }
+      el.innerHTML = list.map(u => {
+        const initials = (u.jina || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+        const isBlocked = u.blocked === true;
+        const isAdminUser = u.isAdmin === true;
+        return `
+        <div class="user-card">
+          <div class="user-card-avatar">
+            <span style="font-size:15px;font-weight:800;color:#fff;">${initials}</span>
+          </div>
+          <div class="user-card-info">
+            <p style="font-size:14px;font-weight:700;margin:0 0 2px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
+              ${u.jina || 'Bila Jina'}
+              ${isAdminUser ? '<span style="background:#EEF2FF;color:#4F46E5;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;">Admin</span>' : ''}
+              ${isBlocked ? '<span class="user-blocked-badge">Imezuiwa</span>' : ''}
+            </p>
+            <p style="font-size:11px;color:var(--wakala-text-muted);margin:0;">${u.email || '—'}</p>
+            <p style="font-size:11px;color:var(--wakala-text-muted);margin:0;">${u.simu || ''} ${u.mkoa ? '· ' + u.mkoa : ''}</p>
+          </div>
+          ${!isAdminUser ? `
+          <button onclick="toggleBlock('${u.uid}', ${isBlocked})"
+            style="flex-shrink:0;border:none;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:700;cursor:pointer;background:${isBlocked ? '#D1FAE5' : '#FEE2E2'};color:${isBlocked ? '#065F46' : '#DC2626'};">
+            ${isBlocked ? 'Fungua' : 'Zuia'}
+          </button>` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    async function toggleBlock(uid, currentlyBlocked) {
+      try {
+        await setUserBlocked(uid, !currentlyBlocked);
+        // Update local list
+        const u = allUsers.find(u => u.uid === uid);
+        if (u) u.blocked = !currentlyBlocked;
+        filterUsers();
+        showToast(currentlyBlocked ? 'Akaunti imefunguliwa!' : 'Akaunti imezuiwa!');
+      } catch (e) {
+        showToast('Hitilafu imetokea. Jaribu tena.');
+      }
+    }
+
   </script>
 </body>
 </html>
