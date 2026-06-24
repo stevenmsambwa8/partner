@@ -380,9 +380,11 @@ async function getUsers() {
 }
 
 // Admin: block or unblock a user by uid
+// Must write directly to the blocked child node — the parent $uid .write
+// rule restricts to auth.uid === $uid, but the blocked child rule allows admin.
 async function setUserBlocked(uid, blocked) {
   const fb = await wpFirebaseReady();
-  await fb.update(fb.ref(fb.db, `users/${uid}`), { blocked: blocked ? true : false });
+  await fb.set(fb.ref(fb.db, `users/${uid}/blocked`), blocked ? true : false);
 }
 
 // Check if current user is blocked — called on every protected page load
